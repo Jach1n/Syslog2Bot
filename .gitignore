@@ -1,0 +1,40 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.app
+
+# Build output
+build/bin/
+frontend/dist/
+
+# Database
+*.db
+syslog.db
+
+# Logs
+*.log
+debug.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.md5
+
+# Trae IDE specs
+.trae/specs/
+
+# Node modules (will be installed by npm)
+# frontend/node_modules/

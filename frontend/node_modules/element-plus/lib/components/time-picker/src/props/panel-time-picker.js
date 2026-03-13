@@ -1,0 +1,15 @@
+'use strict';
+
+var shared = require('./shared.js');
+var runtime = require('../../../../utils/vue/props/runtime.js');
+
+const panelTimePickerProps = runtime.buildProps({
+  ...shared.timePanelSharedProps,
+  datetimeRole: String,
+  parsedValue: {
+    type: runtime.definePropType(Object)
+  }
+});
+
+exports.panelTimePickerProps = panelTimePickerProps;
+//# sourceMappingURL=panel-time-picker.js.map

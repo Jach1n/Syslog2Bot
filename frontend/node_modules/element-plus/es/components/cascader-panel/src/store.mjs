@@ -1,0 +1,77 @@
+import { isEqual } from 'lodash-unified';
+import Node from './node.mjs';
+import { isPropAbsent } from '../../../utils/types.mjs';
+
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+const flatNodes = (nodes, leafOnly) => {
+  return nodes.reduce((res, node) => {
+    if (node.isLeaf) {
+      res.push(node);
+    } else {
+      !leafOnly && res.push(node);
+      res = res.concat(flatNodes(node.children, leafOnly));
+    }
+    return res;
+  }, []);
+};
+class Store {
+  constructor(data, config) {
+    this.config = config;
+    __publicField(this, "nodes");
+    __publicField(this, "allNodes");
+    __publicField(this, "leafNodes");
+    const nodes = (data || []).map(
+      (nodeData) => new Node(nodeData, this.config)
+    );
+    this.nodes = nodes;
+    this.allNodes = flatNodes(nodes, false);
+    this.leafNodes = flatNodes(nodes, true);
+  }
+  getNodes() {
+    return this.nodes;
+  }
+  getFlattedNodes(leafOnly) {
+    return leafOnly ? this.leafNodes : this.allNodes;
+  }
+  appendNode(nodeData, parentNode) {
+    const node = parentNode ? parentNode.appendChild(nodeData) : new Node(nodeData, this.config);
+    if (!parentNode) this.nodes.push(node);
+    this.appendAllNodesAndLeafNodes(node);
+  }
+  appendNodes(nodeDataList, parentNode) {
+    if (nodeDataList.length > 0) {
+      nodeDataList.forEach((nodeData) => this.appendNode(nodeData, parentNode));
+    } else {
+      parentNode && parentNode.isLeaf && this.leafNodes.push(parentNode);
+    }
+  }
+  appendAllNodesAndLeafNodes(node) {
+    this.allNodes.push(node);
+    node.isLeaf && this.leafNodes.push(node);
+    if (node.children) {
+      node.children.forEach((subNode) => {
+        this.appendAllNodesAndLeafNodes(subNode);
+      });
+    }
+  }
+  // when checkStrictly, leaf node first
+  getNodeByValue(value, leafOnly = false) {
+    if (isPropAbsent(value)) return null;
+    const node = this.getFlattedNodes(leafOnly).find(
+      (node2) => isEqual(node2.value, value) || isEqual(node2.pathValues, value)
+    );
+    return node || null;
+  }
+  getSameNode(node) {
+    if (!node) return null;
+    const node_ = this.getFlattedNodes(false).find(
+      ({ value, level }) => isEqual(node.value, value) && node.level === level
+    );
+    return node_ || null;
+  }
+}
+
+export { Store as default };
+//# sourceMappingURL=store.mjs.map

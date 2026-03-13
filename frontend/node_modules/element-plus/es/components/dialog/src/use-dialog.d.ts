@@ -1,0 +1,33 @@
+import type { CSSProperties, Ref, TransitionProps } from 'vue';
+import type { DialogProps } from './dialog';
+export declare const useDialog: (props: DialogProps, targetRef: Ref<HTMLElement | undefined>) => {
+    afterEnter: () => void;
+    afterLeave: () => void;
+    beforeLeave: () => void;
+    handleClose: () => void;
+    onModalClick: () => void;
+    close: () => void;
+    doClose: () => void;
+    onOpenAutoFocus: () => void;
+    onCloseAutoFocus: () => void;
+    onCloseRequested: () => void;
+    onFocusoutPrevented: (event: CustomEvent) => void;
+    titleId: Ref<string>;
+    bodyId: Ref<string>;
+    closed: Ref<boolean>;
+    style: import("vue").ComputedRef<CSSProperties>;
+    overlayDialogStyle: import("vue").ComputedRef<CSSProperties>;
+    rendered: Ref<boolean>;
+    visible: Ref<boolean>;
+    zIndex: Ref<number>;
+    transitionConfig: import("vue").ComputedRef<TransitionProps | {
+        name: import("./dialog").DialogTransition;
+        onAfterEnter: () => void;
+        onBeforeLeave: () => void;
+        onAfterLeave: () => void;
+    }>;
+    _draggable: import("vue").ComputedRef<boolean>;
+    _alignCenter: import("vue").ComputedRef<boolean>;
+    _overflow: import("vue").ComputedRef<boolean>;
+    closing: Ref<boolean>;
+};

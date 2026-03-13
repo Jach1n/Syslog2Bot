@@ -1,0 +1,8 @@
+'use strict';
+
+const DROPDOWN_INJECTION_KEY = /* @__PURE__ */ Symbol("elDropdown");
+const DROPDOWN_INSTANCE_INJECTION_KEY = "elDropdown";
+
+exports.DROPDOWN_INJECTION_KEY = DROPDOWN_INJECTION_KEY;
+exports.DROPDOWN_INSTANCE_INJECTION_KEY = DROPDOWN_INSTANCE_INJECTION_KEY;
+//# sourceMappingURL=tokens.js.map

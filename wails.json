@@ -1,0 +1,32 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "Syslog2Bot",
+  "outputfilename": "Syslog2Bot",
+  "icon": "build/appicon.png",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "jachin",
+    "email": "jachin@example.com"
+  },
+  "info": {
+    "companyName": "Syslog2Bot",
+    "productName": "Syslog2Bot",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright © 2024",
+    "shortDescription": "安全设备告警推送系统",
+    "homepage": "https://github.com/jachin/syslog-alert",
+    "license": "MIT",
+    "repository": {
+      "type": "github",
+      "url": "https://github.com/jachin/syslog-alert"
+    }
+  },
+  "outputDir": {
+    "windows": "build/windows",
+    "darwin": "build/darwin",
+    "linux": "build/linux"
+  }
+}

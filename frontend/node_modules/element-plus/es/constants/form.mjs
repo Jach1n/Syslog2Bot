@@ -1,0 +1,5 @@
+const MINIMUM_INPUT_WIDTH = 11;
+const BORDER_HORIZONTAL_WIDTH = 2;
+
+export { BORDER_HORIZONTAL_WIDTH, MINIMUM_INPUT_WIDTH };
+//# sourceMappingURL=form.mjs.map

@@ -1,0 +1,53 @@
+import { isRef, computed, watch, onScopeDispose } from 'vue';
+import { useNamespace } from '../use-namespace/index.mjs';
+import { throwError } from '../../utils/error.mjs';
+import { hasClass, addClass, getStyle, removeClass } from '../../utils/dom/style.mjs';
+import { getScrollBarWidth } from '../../utils/dom/scroll.mjs';
+
+const useLockscreen = (trigger, options = {}) => {
+  if (!isRef(trigger)) {
+    throwError(
+      "[useLockscreen]",
+      "You need to pass a ref param to this function"
+    );
+  }
+  const ns = options.ns || useNamespace("popup");
+  const hiddenCls = computed(() => ns.bm("parent", "hidden"));
+  let scrollBarWidth = 0;
+  let withoutHiddenClass = false;
+  let bodyWidth = "0";
+  let cleaned = false;
+  const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
+    setTimeout(() => {
+      if (typeof document === "undefined") return;
+      if (withoutHiddenClass && document) {
+        document.body.style.width = bodyWidth;
+        removeClass(document.body, hiddenCls.value);
+      }
+    }, 200);
+  };
+  watch(trigger, (val) => {
+    if (!val) {
+      cleanup();
+      return;
+    }
+    cleaned = false;
+    withoutHiddenClass = !hasClass(document.body, hiddenCls.value);
+    if (withoutHiddenClass) {
+      bodyWidth = document.body.style.width;
+      addClass(document.body, hiddenCls.value);
+    }
+    scrollBarWidth = getScrollBarWidth(ns.namespace.value);
+    const bodyHasOverflow = document.documentElement.clientHeight < document.body.scrollHeight;
+    const bodyOverflowY = getStyle(document.body, "overflowY");
+    if (scrollBarWidth > 0 && (bodyHasOverflow || bodyOverflowY === "scroll") && withoutHiddenClass) {
+      document.body.style.width = `calc(100% - ${scrollBarWidth}px)`;
+    }
+  });
+  onScopeDispose(() => cleanup());
+};
+
+export { useLockscreen };
+//# sourceMappingURL=index.mjs.map

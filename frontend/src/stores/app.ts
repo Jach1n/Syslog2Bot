@@ -18,6 +18,7 @@ export interface SystemStats {
   cpuUsage: number
   connections: number
   receiveRate: number
+  databaseSize: number
 }
 
 export const useAppStore = defineStore('app', () => {
@@ -32,7 +33,8 @@ export const useAppStore = defineStore('app', () => {
     memoryUsage: 0,
     cpuUsage: 0,
     connections: 0,
-    receiveRate: 0
+    receiveRate: 0,
+    databaseSize: 0
   })
   const listenPort = ref(5140)
   const protocol = ref('udp')

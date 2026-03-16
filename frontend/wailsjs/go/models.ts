@@ -143,7 +143,6 @@ export namespace main {
 	    ipAddress: string;
 	    groupId: number;
 	    groupName: string;
-	    parseTemplateId: number;
 	    description: string;
 	    isActive: boolean;
 	    // Go type: time
@@ -162,7 +161,6 @@ export namespace main {
 	        this.ipAddress = source["ipAddress"];
 	        this.groupId = source["groupId"];
 	        this.groupName = source["groupName"];
-	        this.parseTemplateId = source["parseTemplateId"];
 	        this.description = source["description"];
 	        this.isActive = source["isActive"];
 	        this.createdAt = this.convertValues(source["createdAt"], null);
@@ -731,6 +729,7 @@ export namespace main {
 	    connections: number;
 	    receiveRate: number;
 	    protocol: string;
+	    databaseSize: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new SystemStats(source);
@@ -748,6 +747,7 @@ export namespace main {
 	        this.connections = source["connections"];
 	        this.receiveRate = source["receiveRate"];
 	        this.protocol = source["protocol"];
+	        this.databaseSize = source["databaseSize"];
 	    }
 	}
 	export class Template {

@@ -26,9 +26,12 @@ const systemStats = ref({
   activeAlertPolicies: 0,
   activeRobots: 0,
   memoryUsage: 0,
+  cpuUsage: 0,
   goroutineCount: 0,
   connections: 0,
-  receiveRate: 0
+  receiveRate: 0,
+  databaseSize: 0,
+  activeDevices: 0
 })
 
 const receiveRateHistory = ref<number[]>([])
@@ -72,9 +75,12 @@ async function loadSystemStats() {
       activeAlertPolicies: stats.activeAlertPolicies || 0,
       activeRobots: stats.activeRobots || 0,
       memoryUsage: stats.memoryUsage || 0,
+      cpuUsage: stats.cpuUsage || 0,
       goroutineCount: stats.goroutineCount || 0,
       connections: stats.connections || 0,
-      receiveRate: stats.receiveRate || 0
+      receiveRate: stats.receiveRate || 0,
+      databaseSize: stats.databaseSize || 0,
+      activeDevices: stats.activeDevices || 0
     }
     
     receiveRateHistory.value.push(stats.receiveRate || 0)
@@ -115,6 +121,19 @@ function formatBytes(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+function formatSize(bytes: number): string {
+  return formatBytes(bytes)
+}
+
+function formatUptime(seconds: number): string {
+  if (seconds < 60) return `${Math.floor(seconds)}秒`
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}分钟`
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}小时${Math.floor((seconds % 3600) / 60)}分`
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  return `${days}天${hours}小时`
 }
 
 function getSmoothPath(data: number[]): string {
@@ -246,29 +265,18 @@ function getSmoothLinePath(data: number[]): string {
             </div>
             <div class="resource-value">{{ systemStats.memoryUsage }} MB</div>
             <div class="resource-bar">
-              <div class="bar-fill" :style="{ width: Math.min(systemStats.memoryUsage / 100 * 100, 100) + '%' }"></div>
-            </div>
-          </div>
-          
-          <div class="resource-item">
-            <div class="resource-header">
-              <el-icon><Connection /></el-icon>
-              <span>活跃连接</span>
-            </div>
-            <div class="resource-value">{{ systemStats.connections }}</div>
-            <div class="resource-bar">
-              <div class="bar-fill" :style="{ width: Math.min(systemStats.connections / 10 * 100, 100) + '%' }"></div>
+              <div class="bar-fill" :style="{ width: Math.min(systemStats.memoryUsage / 500 * 100, 100) + '%' }"></div>
             </div>
           </div>
           
           <div class="resource-item">
             <div class="resource-header">
               <el-icon><TrendCharts /></el-icon>
-              <span>接收速率</span>
+              <span>CPU使用率</span>
             </div>
-            <div class="resource-value">{{ systemStats.receiveRate }}/s</div>
+            <div class="resource-value">{{ systemStats.cpuUsage.toFixed(1) }}%</div>
             <div class="resource-bar">
-              <div class="bar-fill" :style="{ width: Math.min(systemStats.receiveRate / 100 * 100, 100) + '%' }"></div>
+              <div class="bar-fill" :style="{ width: Math.min(systemStats.cpuUsage, 100) + '%' }"></div>
             </div>
           </div>
           
@@ -282,28 +290,39 @@ function getSmoothLinePath(data: number[]): string {
               <div class="bar-fill" :style="{ width: Math.min(systemStats.goroutineCount / 100 * 100, 100) + '%' }"></div>
             </div>
           </div>
-        
-        <div class="resource-item">
-          <div class="resource-header">
-            <el-icon><TrendCharts /></el-icon>
-            <span>接收速率趋势</span>
+          
+          <div class="resource-item">
+            <div class="resource-header">
+              <el-icon><TrendCharts /></el-icon>
+              <span>处理速率</span>
+            </div>
+            <div class="resource-value">{{ systemStats.receiveRate.toFixed(1) }}/秒</div>
+            <div class="resource-bar">
+              <div class="bar-fill" :style="{ width: Math.min(systemStats.receiveRate / 100 * 100, 100) + '%' }"></div>
+            </div>
           </div>
-          <div class="resource-value">{{ systemStats.receiveRate }}/s</div>
-          <div class="resource-bar">
-            <div class="bar-fill" :style="{ width: Math.min(systemStats.receiveRate / 100 * 100, 100) + '%' }"></div>
+          
+          <div class="resource-item">
+            <div class="resource-header">
+              <el-icon><DataLine /></el-icon>
+              <span>数据库大小</span>
+            </div>
+            <div class="resource-value">{{ formatSize(systemStats.databaseSize) }}</div>
+            <div class="resource-bar">
+              <div class="bar-fill" :style="{ width: Math.min(systemStats.databaseSize / 524288000 * 100, 100) + '%' }"></div>
+            </div>
           </div>
-        </div>
-        
-        <div class="resource-item">
-          <div class="resource-header">
-            <el-icon><Cpu /></el-icon>
-            <span>内存使用趋势</span>
+          
+          <div class="resource-item">
+            <div class="resource-header">
+              <el-icon><Connection /></el-icon>
+              <span>活跃服务器</span>
+            </div>
+            <div class="resource-value">{{ systemStats.activeDevices }} 台</div>
+            <div class="resource-bar">
+              <div class="bar-fill" :style="{ width: Math.min(systemStats.activeDevices / 50 * 100, 100) + '%' }"></div>
+            </div>
           </div>
-          <div class="resource-value">{{ systemStats.memoryUsage }} MB</div>
-          <div class="resource-bar">
-            <div class="bar-fill" :style="{ width: Math.min(systemStats.memoryUsage / 100 * 100, 100) + '%' }"></div>
-          </div>
-        </div>
         </div>
       </div>
     </div>

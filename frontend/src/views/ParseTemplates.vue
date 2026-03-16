@@ -1458,109 +1458,102 @@ function applyPresetTemplate(value: string) {
               </template>
             </el-alert>
             
-            <el-row :gutter="15">
-              <el-col :span="12">
-                <el-form-item label="告警名称">
-                  <template #label>
-                    告警名称 <el-tag type="info" size="small">→ alertName</el-tag>
-                  </template>
-                  <el-select v-model="currentSubTemplateConfig.alertNameField" placeholder="选择字段" style="width: 100%">
-                    <el-option 
-                      v-for="(field, index) in parsedFields" 
-                      :key="index" 
-                      :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
-                      :value="index"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="攻击IP">
-                  <template #label>
-                    攻击IP <el-tag type="info" size="small">→ attackIP</el-tag>
-                  </template>
-                  <el-select v-model="currentSubTemplateConfig.attackIPField" placeholder="选择字段" style="width: 100%">
-                    <el-option 
-                      v-for="(field, index) in parsedFields" 
-                      :key="index" 
-                      :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
-                      :value="index"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            
-            <el-row :gutter="15">
-              <el-col :span="12">
-                <el-form-item label="受害IP">
-                  <template #label>
-                    受害IP <el-tag type="info" size="small">→ victimIP</el-tag>
-                  </template>
-                  <el-select v-model="currentSubTemplateConfig.victimIPField" placeholder="选择字段" style="width: 100%">
-                    <el-option 
-                      v-for="(field, index) in parsedFields" 
-                      :key="index" 
-                      :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
-                      :value="index"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="告警时间">
-                  <template #label>
-                    告警时间 <el-tag type="info" size="small">→ alertTime</el-tag>
-                  </template>
-                  <el-select v-model="currentSubTemplateConfig.alertTimeField" placeholder="选择字段" style="width: 100%">
-                    <el-option 
-                      v-for="(field, index) in parsedFields" 
-                      :key="index" 
-                      :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
-                      :value="index"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            
-            <el-row :gutter="15">
-              <el-col :span="12">
-                <el-form-item label="威胁等级">
-                  <template #label>
-                    威胁等级 <el-tag type="info" size="small">→ severity</el-tag>
-                  </template>
-                  <el-select v-model="currentSubTemplateConfig.severityField" placeholder="选择字段" style="width: 100%">
-                    <el-option 
-                      v-for="(field, index) in parsedFields" 
-                      :key="index" 
-                      :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
-                      :value="index"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="攻击结果">
-                  <template #label>
-                    攻击结果 <el-tag type="info" size="small">→ attackResult</el-tag>
-                  </template>
-                  <el-select 
-                    v-model="currentSubTemplateConfig.attackResultField" 
-                    :placeholder="currentSubTemplateType === 'ioc_alert' ? 'IOC告警自动设置' : '选择字段'" 
-                    style="width: 100%"
-                    :disabled="currentSubTemplateType === 'ioc_alert'"
-                  >
-                    <el-option 
-                      v-for="(field, index) in parsedFields" 
-                      :key="index" 
-                      :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
-                      :value="index"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-            </el-row>
+            <div class="field-mapping-section">
+              <div class="field-mapping-item">
+                <span class="field-name">告警名称</span>
+                <span class="field-arrow">→</span>
+                <el-select v-model="currentSubTemplateConfig.alertNameField" placeholder="选择字段" class="field-select">
+                  <el-option 
+                    v-for="(field, index) in parsedFields" 
+                    :key="index" 
+                    :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
+                    :value="index"
+                  />
+                </el-select>
+                <span class="field-arrow">→</span>
+                <span class="field-variable">存入变量: alertName</span>
+              </div>
+              
+              <div class="field-mapping-item">
+                <span class="field-name">攻击IP</span>
+                <span class="field-arrow">→</span>
+                <el-select v-model="currentSubTemplateConfig.attackIPField" placeholder="选择字段" class="field-select">
+                  <el-option 
+                    v-for="(field, index) in parsedFields" 
+                    :key="index" 
+                    :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
+                    :value="index"
+                  />
+                </el-select>
+                <span class="field-arrow">→</span>
+                <span class="field-variable">存入变量: attackIP</span>
+              </div>
+              
+              <div class="field-mapping-item">
+                <span class="field-name">受害IP</span>
+                <span class="field-arrow">→</span>
+                <el-select v-model="currentSubTemplateConfig.victimIPField" placeholder="选择字段" class="field-select">
+                  <el-option 
+                    v-for="(field, index) in parsedFields" 
+                    :key="index" 
+                    :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
+                    :value="index"
+                  />
+                </el-select>
+                <span class="field-arrow">→</span>
+                <span class="field-variable">存入变量: victimIP</span>
+              </div>
+              
+              <div class="field-mapping-item">
+                <span class="field-name">告警时间</span>
+                <span class="field-arrow">→</span>
+                <el-select v-model="currentSubTemplateConfig.alertTimeField" placeholder="选择字段" class="field-select">
+                  <el-option 
+                    v-for="(field, index) in parsedFields" 
+                    :key="index" 
+                    :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
+                    :value="index"
+                  />
+                </el-select>
+                <span class="field-arrow">→</span>
+                <span class="field-variable">存入变量: alertTime</span>
+              </div>
+              
+              <div class="field-mapping-item">
+                <span class="field-name">威胁等级</span>
+                <span class="field-arrow">→</span>
+                <el-select v-model="currentSubTemplateConfig.severityField" placeholder="选择字段" class="field-select">
+                  <el-option 
+                    v-for="(field, index) in parsedFields" 
+                    :key="index" 
+                    :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
+                    :value="index"
+                  />
+                </el-select>
+                <span class="field-arrow">→</span>
+                <span class="field-variable">存入变量: severity</span>
+              </div>
+              
+              <div class="field-mapping-item">
+                <span class="field-name">攻击结果</span>
+                <span class="field-arrow">→</span>
+                <el-select 
+                  v-model="currentSubTemplateConfig.attackResultField" 
+                  :placeholder="currentSubTemplateType === 'ioc_alert' ? 'IOC告警无此字段' : '选择字段'" 
+                  class="field-select"
+                  :disabled="currentSubTemplateType === 'ioc_alert'"
+                >
+                  <el-option 
+                    v-for="(field, index) in parsedFields" 
+                    :key="index" 
+                    :label="`field_${index}: ${field.substring(0, 30)}${field.length > 30 ? '...' : ''}`"
+                    :value="index"
+                  />
+                </el-select>
+                <span class="field-arrow">→</span>
+                <span class="field-variable">存入变量: attackResult</span>
+              </div>
+            </div>
             
             <el-alert 
               v-if="currentSubTemplateType === 'ioc_alert'" 
@@ -1630,6 +1623,47 @@ function applyPresetTemplate(value: string) {
     justify-content: space-between;
     align-items: center;
   }
+}
+
+.field-mapping-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field-mapping-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.field-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--el-text-color-primary);
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.field-arrow {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.field-select {
+  flex: 1;
+  min-width: 200px;
+}
+
+.field-variable {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  background: var(--el-fill-color-light);
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 </style>
 

@@ -64,7 +64,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  标题栏 (透明) - Syslog2Bot v1.3.2 — By 迷人安全    [ON/OFF]   │
+│  标题栏 (透明) - Syslog2Bot v1.3.3 — By 迷人安全    [ON/OFF]   │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌──────────┐  ┌─────────────────────────────────────────────┐  │
 │  │ 🔔 Syslog│  │                                             │  │
@@ -86,7 +86,7 @@
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**UI 特性**：
+**UI 特性**:
 - **透明标题栏** - macOS 原生标题栏透明，内容延伸到标题栏下方
 - **自定义窗口控制** - 标题栏居中显示应用标题，右侧放置服务开关
 - **可折叠侧边栏** - 支持展开/折叠，折叠时仅显示图标
@@ -122,7 +122,7 @@ copy "C:\path\to\old\data\syslog.db" "%USERPROFILE%\.syslog-alert\syslog.db"
 
 | 表名 | 说明 | 主要字段 |
 |------|------|----------|
-| `devices` | 设备配置 | id, name, ip_address, parse_template_id, is_active |
+| `devices` | 设备配置 | id, name, ip_address, group_id, is_active |
 | `device_groups` | 设备分组 | id, name, description |
 | `field_mapping_docs` | 字段映射文档 | id, name, device_type, field_mappings |
 | `parse_templates` | 解析模板 | id, name, parse_type, header_regex, field_mapping, value_transform |
@@ -165,11 +165,6 @@ sqlite3 ~/.syslog-alert/syslog.db "SELECT id, device_name, filter_status, alert_
 ```
 设备(devices)
     │
-    ├── parse_template_id ──► 解析模板(parse_templates)
-    │                              │
-    │                              ├── field_mapping: 字段映射
-    │                              └── value_transform: 值转换
-    │
     └── 筛选策略(filter_policies)
            │
            ├── device_id: 关联设备
@@ -190,7 +185,6 @@ sqlite3 ~/.syslog-alert/syslog.db "SELECT id, device_name, filter_status, alert_
 ### 1. 设备管理
 - 设备信息配置（名称、IP地址）
 - 设备分组管理
-- 解析模板关联
 - 设备状态监控
 
 ### 2. 映射文档库
@@ -200,7 +194,7 @@ sqlite3 ~/.syslog-alert/syslog.db "SELECT id, device_name, filter_status, alert_
 - 支持嵌套字段结构（如天眼格式）
 
 ### 3. 解析模板
-- 支持七种解析类型：`syslog_json`、`json`、`delimiter`、`keyvalue`、`regex`、`kv`、`smart_delimiter`
+- 支持七种解析类型： `syslog_json`、`json`、`delimiter`、`keyvalue`、`regex`、`kv`、`smart_delimiter`
 - 预设模板（云锁、天眼）一键配置
 - 字段映射配置（支持拖拽排序）
 - 值转换规则
@@ -227,6 +221,15 @@ sqlite3 ~/.syslog-alert/syslog.db "SELECT id, device_name, filter_status, alert_
 - 自定义输出模板
 - 钉钉机器人推送
 - 支持嵌套字段解析（如 `{{machine.ipv4}}`）
+
+### 6. 系统状态监控
+- **资源使用情况**：
+  - 内存使用：程序内存占用 (MB)
+  - CPU使用率：CPU 使用百分比
+  - Goroutines：协程数量
+  - 处理速率：每秒处理的日志数量
+  - 数据库大小：自动转换 KB/MB/GB
+  - 活跃服务器：最近1小时内活跃的日志源IP数量
 
 ---
 
@@ -291,89 +294,90 @@ sqlite3 ~/.syslog-alert/syslog.db "SELECT id, device_name, filter_status, alert_
                              │
                              ▼
                         ┌──────────┐
-                        │ 设备识别  │ ← 根据 Source IP 匹配设备
+                        │ 日志解析  │
                         └────┬─────┘
                              │
                              ▼
                         ┌──────────┐
-                        │ 日志解析  │ ← 应用解析模板
+                        │ 筛选过滤  │
                         └────┬─────┘
                              │
                              ▼
                         ┌──────────┐
-                        │ 策略筛选  │ ← 匹配筛选策略
-                        └────┬─────┘
-                             │
-              ┌──────────────┼──────────────┐
-              │              │              │
-              ▼              ▼              ▼
-         [匹配成功]     [匹配失败]     [无策略]
-              │              │              │
-              ▼              ▼              ▼
-        ┌──────────┐   标记未匹配     保留原始日志
-        │ 告警推送  │
-        └──────────┘
-              │
-              ▼
-        钉钉机器人
+                        │ 告警推送  │
+                        └──────────┘
 ```
+
+### 配置流程
+
+1. **配置解析模板**
+   - 选择预设模板（云锁/天眼）或手动配置
+   - 使用实时预览测试解析效果
+
+2. **配置筛选策略**
+   - 添加筛选规则，设置匹配条件和动作
+   - 支持多条件组合匹配（AND/OR）
+   - 配置告警去重
+
+3. **配置告警推送**
+   - 添加钉钉机器人
+   - 创建输出模板定义告警消息格式
+   - 添加告警策略，关联筛选策略、机器人和消息模板
+
+4. **启动服务**
+   - 在「系统状态」页面启动 Syslog 服务
+   - 配置安全设备发送 Syslog 到本机 5140 端口
 
 ---
 
-## 解析模板配置
+## 解析类型详解
 
-### 解析类型
-
-#### 1. syslog_json
-适用于 Syslog 格式头部 + JSON 内容的日志（云锁等设备）
+### 1. syslog_json
+适用于 Syslog 头部 + JSON 内容格式（云锁等设备）
 
 ```
 示例日志：
-<134>Mar 15 10:30:00 hostname -: {"attackIp":"192.168.1.100","threatType":"暴力破解"}
+<142>Mar  5 14:41:44 hostname SyslogWriter[123]: {"attackIp":"192.168.1.100","threatType":"暴力破解","level":3}
 
 配置：
-- headerRegex: <(?P<priority>\d+)>(?P<timestamp>\w+ \d+ [\d:]+) (?P<hostname>\S+)[^{]*
-- 字段映射会自动提取 JSON 内容
+- headerRegex: <(?P<priority>\d+)>(?P<timestamp>\w+\s+\d+\s+[\d:]+) (?P<hostname>\S+) (?P<program>\S+):
+- fieldMapping: {"attackIp":"attackIp","threatType":"threatType","level":"level"}
 ```
 
-#### 2. json
-适用于纯 JSON 格式日志
+### 2. json
+适用于纯 JSON 格式
 
-```json
+```
+示例日志：
 {"attackIp":"192.168.1.100","threatType":"暴力破解","level":3}
+
+配置：
+- fieldMapping: {"attackIp":"attackIp","threatType":"threatType","level":"level"}
 ```
 
-#### 3. delimiter（分隔符）
-适用于使用固定分隔符的日志（天眼等设备）
+### 3. delimiter
+适用于分隔符分隔的格式（天眼等设备）
 
 ```
 示例日志：
-<142>Mar  5 14:41:44 hostname SyslogWriter[123]: webids_alert|!serialno|!rule_id|!...
+webids_alert|!serialno|!rule_id|!rule_name|!...
 
 配置：
-- headerRegex: <(?P<priority>\d+)>(?P<timestamp>\w+\s+\d+\s+[\d:]+) (?P<hostname>\S+) (?P<program>\S+): (?P<alert_type>\w+)\|!
-- fieldMapping: {
-    "delimiter": "|!",
-    "type_field": "alert_type",
-    "type_mapping": {
-      "webids_alert": ["alert_type", "serialno", "rule_id", ...],
-      "ips_alert": ["alert_type", "serialno", "rule_id", ...]
-    }
-  }
+- fieldMapping: {"delimiter":"|!","fields":["alert_type","serialno","rule_id","rule_name",...]}
 ```
 
-#### 4. keyvalue（键值对分隔）
-适用于分隔符分隔的键值对格式
+### 4. keyvalue
+适用于键值对格式
 
 ```
 示例日志：
-updatetime:2022-12-29 15:44:28|!level:3|!serialno:214585853|!note:测试日志
+attackIp=192.168.1.100 threatType="暴力破解" level=3
 
 配置：
-- fieldMapping: {"delimiter": "|!", "kv_separator": ":"}
+- fieldMapping: {"kv_separator":"="}
 ```
 
-#### 5. regex
+### 5. regex
 适用于非结构化日志
 
 ```
@@ -384,15 +388,16 @@ Attack from 192.168.1.100, type=暴力破解, level=3
 - headerRegex: Attack from (?P<attackIp>[\d.]+), type=(?P<threatType>\S+), level=(?P<level>\d+)
 ```
 
-#### 6. kv
+### 6. kv
 适用于键值对格式
 
 ```
 示例日志：
 attackIp=192.168.1.100 threatType="暴力破解" level=3
+
 ```
 
-#### 7. smart_delimiter（智能分隔符）
+### 7. smart_delimiter（智能分隔符）
 适用于同一设备有多种告警类型的日志（天眼等设备），根据告警类型自动选择子模板解析。
 
 ```
@@ -413,6 +418,14 @@ attackIp=192.168.1.100 threatType="暴力破解" level=3
       "alertTimeField": 4,
       "severityField": 10,
       "attackResultField": 26
+    },
+    "ips_alert": {
+      "alertNameField": 3,
+      "attackIPField": 6,
+      "victimIPField": 8,
+      "alertTimeField": 4,
+      "severityField": 10,
+      "attackResultField": 24
     },
     "ioc_alert": {
       "alertNameField": 18,
@@ -438,7 +451,7 @@ attackIp=192.168.1.100 threatType="暴力破解" level=3
 | 预设模板 | 解析类型 | 适用设备 |
 |---------|---------|---------|
 | 云锁 | syslog_json | 云锁安全设备 |
-| 天眼 | delimiter | 天眼安全设备 |
+| 天眼-组合解析 | smart_delimiter | 天眼安全设备 |
 
 ### 字段映射
 
@@ -454,32 +467,23 @@ attackIp=192.168.1.100 threatType="暴力破解" level=3
 #### 嵌套格式（天眼）
 ```json
 {
-  "delimiter": "|!",
-  "type_field": "alert_type",
-  "type_mapping": {
-    "webids_alert": ["alert_type", "serialno", "rule_id", "rule_name", "write_date", "vuln_type", "sip", "sport", "dip", "dport", "severity", ...],
-    "ips_alert": ["alert_type", "serialno", "rule_id", ...]
-  }
+  "machine.ipv4": "攻击者IP",
+  "threat_type": "威胁类型",
+  "level": "威胁等级"
 }
 ```
 
 ### 值转换
 
+支持对字段值进行转换，例如：
+
 ```json
 {
   "severity": {
     "2": "低危",
-    "3": "低危",
     "4": "中危",
-    "5": "中危",
     "6": "高危",
-    "7": "高危",
-    "8": "危急",
-    "9": "危急",
-    "low": "低危",
-    "medium": "中危",
-    "high": "高危",
-    "critical": "危急"
+    "8": "危急"
   },
   "attackResult": {
     "0": "失败",
@@ -490,30 +494,16 @@ attackIp=192.168.1.100 threatType="暴力破解" level=3
 }
 ```
 
-**值转换特性**：
-- 支持数字和字符串类型的值
-- 支持同一字段多种格式的转换（如 severity 同时支持数字和英文）
-- 自动保留原始值到 `{字段名}Raw` 字段
-
 ---
 
 ## 筛选条件
 
-### 条件格式
+### 操作符
 
-```json
-[
-  {"field": "threatType", "operator": "contains", "value": "暴力破解"},
-  {"field": "level", "operator": ">=", "value": "3"}
-]
-```
-
-### 支持的操作符
-
-| 操作符 | 说明 | 示例 |
-|--------|------|------|
-| `==`, `equals` | 等于 | `{"field": "status", "operator": "==", "value": "success"}` |
-| `!=`, `not_equals` | 不等于 | `{"field": "status", "operator": "!=", "value": "normal"}` |
+| 操作符 | 别名 | 说明 | 示例 |
+|--------|------|------|------|
+| `==` | `equals` | 等于 | `{"field": "level", "operator": "==", "value": "3"}` |
+| `!=` | `not_equals` | 不等于 | `{"field": "status", "operator": "!=", "value": "normal"}` |
 | `contains` | 包含 | `{"field": "message", "operator": "contains", "value": "error"}` |
 | `not_contains` | 不包含 | `{"field": "message", "operator": "not_contains", "value": "debug"}` |
 | `starts_with` | 开头匹配 | `{"field": "ip", "operator": "starts_with", "value": "192.168"}` |
@@ -568,7 +558,7 @@ attackIp=192.168.1.100 threatType="暴力破解" level=3
 | `priority` | Syslog 优先级 |
 | `hostname` | 主机名 |
 | `program` | 程序名 |
-| `alertType` | 告警类型（如 webids_alert、ioc_alert） |
+| `alertType` | 告警类型（如 webids_alert、ioc_alert、ips_alert） |
 
 ### 告警时间自动转换
 
@@ -675,20 +665,19 @@ func applyPlatformOptions(appOptions *options.App) {
 
 ### 添加预设模板
 
-在 `frontend/src/views/ParseTemplates.vue` 中添加预设：
+在 `database.go` 的 `CreatePresetTemplates` 函数中添加：
 
-```typescript
-const presetTemplates = [
-  { 
-    value: 'new_device', 
-    label: '新设备', 
-    parseType: 'syslog_json',
-    headerRegex: '正则表达式',
-    fieldMapping: '字段映射JSON',
-    valueTransform: '值转换JSON',
-    desc: '设备描述'
-  }
-]
+```go
+{
+    Name:           "新设备",
+    Description:    "设备描述",
+    ParseType:      "syslog_json",
+    HeaderRegex:    "正则表达式",
+    FieldMapping:   `字段映射JSON`,
+    ValueTransform: `值转换JSON`,
+    DeviceType:     "设备类型",
+    IsActive:       true,
+}
 ```
 
 ### 添加新的推送渠道
@@ -801,40 +790,18 @@ SELECT * FROM syslog_logs ORDER BY received_at DESC LIMIT 10;
 2. 确保字段名与配置中的键名一致
 3. 确保值类型匹配（数字需要用字符串形式配置）
 
----
+### 5. 资源使用情况显示为0
 
-## 调试技巧
+**排查步骤**：
 
-### 启用开发模式
+1. **处理速率为0**
+   - 确保 Syslog 服务已启动
+   - 检查是否有日志正在接收
 
-```bash
-wails dev
-```
+2. **CPU使用率为0**
+   - CPU使用率基于程序运行时间和系统资源计算
+   - 如果程序刚启动，可能显示为0
 
-### 查看日志
-
-- 前端：浏览器开发者工具 Console
-- 后端：终端输出
-
-### 测试正则表达式
-
-使用内置 API：
-
-```go
-TestParseTemplate(request ParseTestRequest) ParseTestResult
-```
-
-### 数据库查看
-
-```bash
-# macOS/Linux
-sqlite3 ~/.syslog-alert/syslog.db
-
-# Windows
-sqlite3 "%USERPROFILE%\.syslog-alert\syslog.db"
-
-# 常用命令
-.tables
-.schema syslog_logs
-SELECT * FROM syslog_logs ORDER BY received_at DESC LIMIT 10;
-```
+3. **活跃服务器为0**
+   - 检查最近1小时内是否有日志接收
+   - 活跃服务器统计的是最近1小时内发送过日志的独立IP数量

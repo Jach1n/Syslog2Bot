@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"sync"
@@ -13,10 +15,11 @@ import (
 )
 
 type App struct {
-	ctx        context.Context
-	syslogSvc  *SyslogService
-	stats      SystemStats
-	statsMutex sync.RWMutex
+	ctx         context.Context
+	syslogSvc   *SyslogService
+	stats       SystemStats
+	statsMutex  sync.RWMutex
+	startTime   time.Time
 }
 
 type SystemStats struct {
@@ -30,6 +33,7 @@ type SystemStats struct {
 	Connections    int     `json:"connections"`
 	ReceiveRate    float64 `json:"receiveRate"`
 	Protocol       string  `json:"protocol"`
+	DatabaseSize   int64   `json:"databaseSize"`
 }
 
 func NewApp() *App {
@@ -37,6 +41,7 @@ func NewApp() *App {
 		stats: SystemStats{
 			ListenPort: 5140,
 		},
+		startTime: time.Now(),
 	}
 }
 
@@ -45,6 +50,42 @@ func (a *App) startup(ctx context.Context) {
 	GetDB()
 	a.syslogSvc = NewSyslogService(a)
 	a.stats.StartTime = time.Now().Format("2006-01-02 15:04:05")
+	go a.startLogCleanupTask()
+}
+
+func (a *App) startLogCleanupTask() {
+	ticker := time.NewTicker(1 * time.Hour)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		a.cleanupLogsIfNeeded()
+	}
+}
+
+func (a *App) cleanupLogsIfNeeded() {
+	db := GetDB()
+	var config SystemConfig
+	if err := db.First(&config).Error; err != nil {
+		return
+	}
+
+	var logCount int64
+	db.Model(&SyslogLog{}).Count(&logCount)
+
+	if logCount > 100000 {
+		cutoff := time.Now().AddDate(0, 0, -config.LogRetention)
+		db.Where("received_at < ?", cutoff).Delete(&SyslogLog{})
+		db.Exec("VACUUM")
+	}
+
+	var alertCount int64
+	db.Model(&AlertRecord{}).Count(&alertCount)
+
+	if alertCount > 50000 {
+		cutoff := time.Now().AddDate(0, 0, -7)
+		db.Where("created_at < ?", cutoff).Delete(&AlertRecord{})
+		db.Exec("VACUUM")
+	}
 }
 
 func (a *App) GetSystemStats() SystemStats {
@@ -56,7 +97,17 @@ func (a *App) GetSystemStats() SystemStats {
 
 	a.stats.MemoryUsage = m.Alloc / 1024 / 1024
 
+	dbPath := getDatabasePath()
+	if info, err := os.Stat(dbPath); err == nil {
+		a.stats.DatabaseSize = info.Size()
+	}
+
 	return a.stats
+}
+
+func getDatabasePath() string {
+	dataDir := getDataDir()
+	return filepath.Join(dataDir, "syslog.db")
 }
 
 func (a *App) UpdateStats(logs int64, devices int, running bool) {
@@ -115,11 +166,11 @@ func (a *App) TestDingTalkWebhook(webhookURL, secret string) (string, error) {
 }
 
 func (a *App) GetAppVersion() string {
-	return "1.0.0"
+	return "1.3.3"
 }
 
 func (a *App) GetPlatformInfo() string {
-	return fmt.Sprintf("%s/%s", "windows", "amd64")
+	return fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
 }
 
 func (a *App) WindowMinimise() {

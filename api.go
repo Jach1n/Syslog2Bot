@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"os"
 	"regexp"
 	"runtime"
 	"time"
@@ -335,8 +336,59 @@ func (a *App) GetDashboardStats() map[string]interface{} {
 	runtime.ReadMemStats(&m)
 	stats["memoryUsage"] = m.Alloc / 1024 / 1024
 	stats["goroutineCount"] = runtime.NumGoroutine()
+	stats["cpuUsage"] = a.getCPUUsage()
+	stats["receiveRate"] = a.getReceiveRate()
+	stats["connections"] = a.getConnections()
+
+	dbPath := getDatabasePath()
+	if info, err := os.Stat(dbPath); err == nil {
+		stats["databaseSize"] = info.Size()
+	} else {
+		stats["databaseSize"] = 0
+	}
+
+	stats["activeDevices"] = a.getActiveDevices()
 
 	return stats
+}
+
+func (a *App) getActiveDevices() int64 {
+	var count int64
+	oneHourAgo := time.Now().Add(-1 * time.Hour)
+	GetDB().Model(&SyslogLog{}).Where("received_at > ?", oneHourAgo).Distinct("source_ip").Count(&count)
+	return count
+}
+
+func (a *App) getCPUUsage() float64 {
+	var cpuUsage float64
+	
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	
+	totalTime := time.Since(a.startTime).Seconds()
+	if totalTime > 0 {
+		cpuTime := float64(m.Sys) / 1e9
+		cpuUsage = (cpuTime / totalTime) * 100
+		if cpuUsage > 100 {
+			cpuUsage = 100
+		}
+	}
+	
+	return cpuUsage
+}
+
+func (a *App) getReceiveRate() float64 {
+	if a.syslogSvc != nil {
+		return a.syslogSvc.GetReceiveRate()
+	}
+	return 0.0
+}
+
+func (a *App) getConnections() int {
+	if a.syslogSvc != nil {
+		return a.syslogSvc.GetConnections()
+	}
+	return 0
 }
 
 func (a *App) CleanupLogs(days int) error {

@@ -18,17 +18,16 @@ type DeviceGroup struct {
 }
 
 type Device struct {
-	ID              uint           `json:"id" gorm:"primaryKey"`
-	Name            string         `json:"name" gorm:"size:100;not null"`
-	IPAddress       string         `json:"ipAddress" gorm:"size:50;not null;uniqueIndex"`
-	GroupID         uint           `json:"groupId" gorm:"index"`
-	GroupName       string         `json:"groupName" gorm:"size:50;default:'default'"`
-	ParseTemplateID uint           `json:"parseTemplateId" gorm:"index"`
-	Description     string         `json:"description" gorm:"size:500"`
-	IsActive        bool           `json:"isActive" gorm:"default:true"`
-	CreatedAt       time.Time      `json:"createdAt"`
-	UpdatedAt       time.Time      `json:"updatedAt"`
-	DeletedAt       gorm.DeletedAt `json:"-" gorm:"index"`
+	ID          uint           `json:"id" gorm:"primaryKey"`
+	Name        string         `json:"name" gorm:"size:100;not null"`
+	IPAddress   string         `json:"ipAddress" gorm:"size:50;not null;uniqueIndex"`
+	GroupID     uint           `json:"groupId" gorm:"index"`
+	GroupName   string         `json:"groupName" gorm:"size:50;default:'default'"`
+	Description string         `json:"description" gorm:"size:500"`
+	IsActive    bool           `json:"isActive" gorm:"default:true"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
 type ParseTemplate struct {
@@ -162,8 +161,8 @@ type SystemConfig struct {
 	ID                    uint   `json:"id" gorm:"primaryKey"`
 	ListenPort            int    `json:"listenPort" gorm:"default:5140"`
 	Protocol              string `json:"protocol" gorm:"size:10;default:'udp'"` // udp or tcp
-	LogRetention          int    `json:"logRetention" gorm:"default:30"`
-	MaxLogSize            int64  `json:"maxLogSize" gorm:"default:1073741824"`
+	LogRetention          int    `json:"logRetention" gorm:"default:7"`
+	MaxLogSize            int64  `json:"maxLogSize" gorm:"default:524288000"`
 	AutoStart             bool   `json:"autoStart" gorm:"default:false"`
 	MinimizeToTray        bool   `json:"minimizeToTray" gorm:"default:true"`
 	AlertEnabled          bool   `json:"alertEnabled" gorm:"default:true"`

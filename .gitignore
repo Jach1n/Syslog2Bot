@@ -9,33 +9,39 @@
 # Build output
 build/bin/
 frontend/dist/
-
 # Database
 *.db
 syslog.db
-
 # Logs
 *.log
 debug.log
-
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-
 # OS
 .DS_Store
 Thumbs.db
-
 # Temporary files
 *.tmp
 *.temp
 *.md5
-
 # Trae IDE
 .trae/
-
-# Node modules (will be installed by npm)
+# Node modules
 frontend/node_modules/
-frontend/node_modules/
+# Public folder
+public/
+# Docs folder (internal docs)
+docs/
+# WeChat articles
+公众号文章.md
+# Sensitive data files
+*.pem
+*.key
+credentials.json
+secrets.json
+# Test data
+test_data/
+*.test

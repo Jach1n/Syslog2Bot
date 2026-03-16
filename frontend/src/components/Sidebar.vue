@@ -15,7 +15,7 @@ const router = useRouter()
 
 const menuItems = [
   { path: '/dashboard', icon: 'Monitor', title: '系统状态', divider: true },
-  { path: '/workflow', icon: 'Share', title: '工作流程', divider: true },
+  { path: '/workflow', icon: 'Share', title: '操作指引', divider: true },
   { path: '/logs', icon: 'Document', title: '日志查看', divider: true },
   { path: '/devices', icon: 'Cpu', title: '设备管理', divider: true },
   { path: '/log-parser', icon: 'Collection', title: '日志解析', divider: true },

@@ -5,16 +5,8 @@ import {
   GetDevices, 
   AddDevice, 
   UpdateDevice, 
-  DeleteDevice,
-  GetParseTemplates
+  DeleteDevice
 } from '../../wailsjs/go/main/App'
-
-interface ParseTemplate {
-  id: number
-  name: string
-  deviceType: string
-  parseType: string
-}
 
 interface Device {
   id?: number
@@ -22,13 +14,11 @@ interface Device {
   ipAddress: string
   description: string
   groupName: string
-  parseTemplateId: number
   isActive: boolean
 }
 
 const loading = ref(false)
 const devices = ref<Device[]>([])
-const parseTemplates = ref<ParseTemplate[]>([])
 const dialogVisible = ref(false)
 const dialogTitle = ref('添加设备')
 const formData = ref<Device>({
@@ -36,13 +26,11 @@ const formData = ref<Device>({
   ipAddress: '',
   description: '',
   groupName: 'default',
-  parseTemplateId: 0,
   isActive: true
 })
 
 onMounted(() => {
   loadDevices()
-  loadParseTemplates()
 })
 
 async function loadDevices() {
@@ -56,14 +44,6 @@ async function loadDevices() {
   }
 }
 
-async function loadParseTemplates() {
-  try {
-    parseTemplates.value = await GetParseTemplates()
-  } catch (e) {
-    console.error(e)
-  }
-}
-
 function handleAdd() {
   dialogTitle.value = '添加设备'
   formData.value = {
@@ -71,7 +51,6 @@ function handleAdd() {
     ipAddress: '',
     description: '',
     groupName: 'default',
-    parseTemplateId: 0,
     isActive: true
   }
   dialogVisible.value = true
@@ -118,12 +97,6 @@ async function handleSubmit() {
     ElMessage.error('操作失败')
   }
 }
-
-function getTemplateName(templateId: number): string {
-  if (!templateId) return '-'
-  const template = parseTemplates.value.find(t => t.id === templateId)
-  return template ? template.name : '-'
-}
 </script>
 
 <template>
@@ -146,14 +119,6 @@ function getTemplateName(templateId: number): string {
         <el-table-column prop="groupName" label="分组" width="100">
           <template #default="{ row }">
             <el-tag size="small">{{ row.groupName || 'default' }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="解析模板" width="150">
-          <template #default="{ row }">
-            <el-tag v-if="row.parseTemplateId" type="success" size="small">
-              {{ getTemplateName(row.parseTemplateId) }}
-            </el-tag>
-            <span v-else class="text-gray">-</span>
           </template>
         </el-table-column>
         <el-table-column prop="description" label="描述" show-overflow-tooltip />
@@ -183,11 +148,6 @@ function getTemplateName(templateId: number): string {
         </el-form-item>
         <el-form-item label="分组">
           <el-input v-model="formData.groupName" placeholder="默认分组: default" />
-        </el-form-item>
-        <el-form-item label="解析模板">
-          <el-select v-model="formData.parseTemplateId" placeholder="选择解析模板" clearable style="width: 100%">
-            <el-option v-for="t in parseTemplates" :key="t.id" :label="`${t.name} (${t.deviceType})`" :value="t.id" />
-          </el-select>
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="formData.description" type="textarea" :rows="3" placeholder="请输入描述" />

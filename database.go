@@ -53,12 +53,19 @@ func GetDB() *gorm.DB {
 		}
 
 		dbPath := filepath.Join(dataDir, "syslog.db")
-		db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+		db, err = gorm.Open(sqlite.Open(dbPath+"?_journal_mode=WAL&_busy_timeout=5000&_sync=NORMAL"), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
 		})
 		if err != nil {
 			panic("Failed to connect database: " + err.Error())
 		}
+
+		sqlDB, err := db.DB()
+		if err != nil {
+			panic("Failed to get database connection: " + err.Error())
+		}
+		sqlDB.SetMaxOpenConns(1)
+		sqlDB.SetMaxIdleConns(1)
 
 		autoMigrate()
 	})
@@ -98,8 +105,8 @@ func initDefaultConfig() {
 	if result.Error == gorm.ErrRecordNotFound {
 		db.Create(&SystemConfig{
 			ListenPort:            5140,
-			LogRetention:          30,
-			MaxLogSize:            1073741824,
+			LogRetention:          7,
+			MaxLogSize:            524288000,
 			AutoStart:             false,
 			MinimizeToTray:        true,
 			AlertEnabled:          true,
@@ -136,10 +143,10 @@ func initDefaultTemplates() {
 	if tianyanCount == 0 {
 		db.Create(&ParseTemplate{
 			Name:           "天眼-组合解析",
-			Description:    "解析天眼安全设备的告警日志，支持webids_alert和ioc_alert",
+			Description:    "解析天眼安全设备的告警日志，支持webids_alert、ips_alert和ioc_alert",
 			ParseType:      "smart_delimiter",
 			HeaderRegex:    "",
-			FieldMapping:   `{"delimiter":"|!","typeField":0,"skipHeader":true,"headerRegex":"","subTemplates":{"webids_alert":{"alertNameField":3,"attackIPField":6,"victimIPField":8,"alertTimeField":4,"severityField":10,"attackResultField":26},"ioc_alert":{"alertNameField":18,"attackIPField":6,"victimIPField":8,"alertTimeField":10,"severityField":12,"attackResultField":-1}}}`,
+			FieldMapping:   `{"delimiter":"|!","typeField":0,"skipHeader":true,"headerRegex":"","subTemplates":{"webids_alert":{"alertNameField":3,"attackIPField":6,"victimIPField":8,"alertTimeField":4,"severityField":10,"attackResultField":26},"ips_alert":{"alertNameField":3,"attackIPField":6,"victimIPField":8,"alertTimeField":4,"severityField":10,"attackResultField":24},"ioc_alert":{"alertNameField":18,"attackIPField":6,"victimIPField":8,"alertTimeField":10,"severityField":12,"attackResultField":-1}}}`,
 			ValueTransform: `{"severity":{"2":"低危","4":"中危","6":"高危","8":"危急"},"attackResult":{"0":"失败","1":"成功","2":"失陷","3":"失败"}}`,
 			DeviceType:     "天眼",
 			IsActive:       true,

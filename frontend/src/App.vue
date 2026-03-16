@@ -1,15 +1,22 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { ElMessage } from 'element-plus'
 import Sidebar from '@/components/Sidebar.vue'
-import { WindowMinimise, WindowMaximise, WindowClose } from '../wailsjs/go/main/App'
+import { WindowMinimise, WindowMaximise, WindowClose, GetPlatformInfo } from '../wailsjs/go/main/App'
 
 const appStore = useAppStore()
 const isCollapse = ref(false)
+const isWindows = ref(false)
 
 onMounted(async () => {
   await appStore.initApp()
+  try {
+    const platform = await GetPlatformInfo()
+    isWindows.value = platform.startsWith('windows')
+  } catch {
+    isWindows.value = false
+  }
 })
 
 async function handleServiceChange(running: boolean) {
@@ -42,7 +49,7 @@ async function handleServiceChange(running: boolean) {
           class="service-switch"
         />
       </div>
-      <div class="window-controls" style="--wails-draggable: no-drag">
+      <div v-if="isWindows" class="window-controls" style="--wails-draggable: no-drag">
         <div class="control-btn minimize" @click="WindowMinimise">
           <svg width="12" height="12" viewBox="0 0 12 12">
             <rect y="5" width="12" height="2" fill="currentColor"/>

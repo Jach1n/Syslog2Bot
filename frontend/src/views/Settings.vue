@@ -9,8 +9,8 @@ const saving = ref(false)
 const config = ref<Partial<SystemConfig>>({
   listenPort: 5140,
   protocol: 'udp',
-  logRetention: 30,
-  maxLogSize: 1073741824,
+  logRetention: 7,
+  maxLogSize: 524288000,
   autoStart: false,
   minimizeToTray: true,
   alertEnabled: true,
@@ -97,8 +97,8 @@ function formatSize(bytes: number): string {
         </el-form-item>
         
         <el-form-item label="最大日志大小">
-          <el-slider v-model="config.maxLogSize" :min="107374182" :max="10737418240" :format-tooltip="formatSize" />
-          <span class="form-tip">当前: {{ formatSize(config.maxLogSize || 0) }}</span>
+          <el-slider v-model="config.maxLogSize" :min="104857600" :max="2147483648" :format-tooltip="formatSize" />
+          <span class="form-tip">当前: {{ formatSize(config.maxLogSize || 0) }} (建议 500MB-1GB)</span>
         </el-form-item>
         
         <el-form-item>

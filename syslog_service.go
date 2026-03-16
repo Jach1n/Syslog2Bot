@@ -13,17 +13,22 @@ import (
 )
 
 type SyslogService struct {
-	udpConn     *net.UDPConn
-	tcpListener net.Listener
-	running     bool
-	port        int
-	protocol    string // "udp" or "tcp"
-	logChan     chan SyslogMessage
-	stopChan    chan struct{}
-	alertCache  map[string]time.Time
-	app         *App
-	mu          sync.RWMutex
-	alertMu     sync.RWMutex
+	udpConn      *net.UDPConn
+	tcpListener  net.Listener
+	running      bool
+	port         int
+	protocol     string
+	logChan      chan SyslogMessage
+	stopChan     chan struct{}
+	alertCache   map[string]time.Time
+	app          *App
+	mu           sync.RWMutex
+	alertMu      sync.RWMutex
+	receiveCount int64
+	lastCount    int64
+	lastTime     time.Time
+	lastRate     float64
+	connCount    int
 }
 
 type SyslogMessage struct {
@@ -270,6 +275,7 @@ func (s *SyslogService) handleMessage(msg SyslogMessage) {
 	}
 
 	CreateLog(syslogLog)
+	s.incrementReceiveCount()
 
 	s.app.UpdateStats(GetLogCount(), int(GetDeviceCount()), true)
 
@@ -713,4 +719,43 @@ func (s *SyslogService) GetPort() int {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.port
+}
+
+func (s *SyslogService) GetReceiveRate() float64 {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	now := time.Now()
+	if s.lastTime.IsZero() {
+		s.lastTime = now
+		s.lastCount = s.receiveCount
+		return 0
+	}
+
+	elapsed := now.Sub(s.lastTime).Seconds()
+	if elapsed < 5 {
+		if s.lastRate > 0 {
+			return s.lastRate
+		}
+		return 0
+	}
+
+	rate := float64(s.receiveCount-s.lastCount) / elapsed
+	s.lastTime = now
+	s.lastCount = s.receiveCount
+	s.lastRate = rate
+
+	return rate
+}
+
+func (s *SyslogService) GetConnections() int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.connCount
+}
+
+func (s *SyslogService) incrementReceiveCount() {
+	s.mu.Lock()
+	s.receiveCount++
+	s.mu.Unlock()
 }

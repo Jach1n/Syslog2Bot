@@ -50,7 +50,7 @@ function navigateTo(path: string) {
   <div class="workflow-view">
     <div class="workflow-diagram">
       <div class="flow-container">
-        <div class="flow-main">
+        <div class="flow-row">
           <div class="flow-node syslog" @click="navigateTo('/dashboard')">
             <div class="node-icon">
               <el-icon :size="32"><Monitor /></el-icon>
@@ -60,7 +60,6 @@ function navigateTo(path: string) {
           </div>
           
           <div class="flow-arrow">
-            <div class="arrow-line"></div>
             <el-icon :size="20"><Right /></el-icon>
           </div>
           
@@ -73,7 +72,6 @@ function navigateTo(path: string) {
           </div>
           
           <div class="flow-arrow">
-            <div class="arrow-line"></div>
             <el-icon :size="20"><Right /></el-icon>
           </div>
           
@@ -86,7 +84,6 @@ function navigateTo(path: string) {
           </div>
           
           <div class="flow-arrow">
-            <div class="arrow-line"></div>
             <el-icon :size="20"><Right /></el-icon>
           </div>
           
@@ -99,7 +96,6 @@ function navigateTo(path: string) {
           </div>
           
           <div class="flow-arrow">
-            <div class="arrow-line"></div>
             <el-icon :size="20"><Right /></el-icon>
           </div>
           
@@ -112,45 +108,53 @@ function navigateTo(path: string) {
           </div>
         </div>
         
+        <div class="flow-connectors">
+          <div class="connector-item">
+            <div class="connector-line"></div>
+            <div class="connector-dot"></div>
+          </div>
+          <div class="connector-item">
+            <div class="connector-line"></div>
+            <div class="connector-dot"></div>
+          </div>
+          <div class="connector-item">
+            <div class="connector-line"></div>
+            <div class="connector-dot"></div>
+          </div>
+          <div class="connector-item">
+            <div class="connector-line"></div>
+            <div class="connector-dot"></div>
+          </div>
+          <div class="connector-item">
+            <div class="connector-line"></div>
+            <div class="connector-dot"></div>
+          </div>
+        </div>
+        
         <div class="flow-details">
-          <div class="detail-item">
-            <div class="detail-line"></div>
-            <div class="detail-card" @click="navigateTo('/devices')">
-              <div class="detail-title">配置设备信息</div>
-              <div class="detail-desc">添加安全设备IP，识别日志来源</div>
-            </div>
+          <div class="detail-card" @click="navigateTo('/devices')">
+            <div class="detail-title">配置设备信息</div>
+            <div class="detail-desc">添加安全设备IP，识别日志来源</div>
           </div>
           
-          <div class="detail-item">
-            <div class="detail-line"></div>
-            <div class="detail-card" @click="navigateTo('/logs')">
-              <div class="detail-title">查看日志状态</div>
-              <div class="detail-desc">实时监控日志接收情况</div>
-            </div>
+          <div class="detail-card" @click="navigateTo('/logs')">
+            <div class="detail-title">查看日志状态</div>
+            <div class="detail-desc">实时监控日志接收情况</div>
           </div>
           
-          <div class="detail-item">
-            <div class="detail-line"></div>
-            <div class="detail-card" @click="navigateTo('/log-parser')">
-              <div class="detail-title">解析逻辑</div>
-              <div class="detail-desc">匹配 → 提取字段 → 不匹配则丢弃</div>
-            </div>
+          <div class="detail-card" @click="navigateTo('/log-parser')">
+            <div class="detail-title">解析逻辑</div>
+            <div class="detail-desc">匹配 → 提取字段 → 不匹配则丢弃</div>
           </div>
           
-          <div class="detail-item">
-            <div class="detail-line"></div>
-            <div class="detail-card" @click="navigateTo('/filter-policies')">
-              <div class="detail-title">筛选规则</div>
-              <div class="detail-desc">匹配条件 → 保留/丢弃 → 触发告警</div>
-            </div>
+          <div class="detail-card" @click="navigateTo('/filter-policies')">
+            <div class="detail-title">筛选规则</div>
+            <div class="detail-desc">匹配条件 → 保留/丢弃 → 触发告警</div>
           </div>
           
-          <div class="detail-item">
-            <div class="detail-line"></div>
-            <div class="detail-card" @click="navigateTo('/robots')">
-              <div class="detail-title">推送配置</div>
-              <div class="detail-desc">机器人Webhook + 消息模板</div>
-            </div>
+          <div class="detail-card" @click="navigateTo('/robots')">
+            <div class="detail-title">推送配置</div>
+            <div class="detail-desc">机器人Webhook + 消息模板</div>
           </div>
         </div>
       </div>
@@ -159,13 +163,55 @@ function navigateTo(path: string) {
     <div class="workflow-details">
       <div class="detail-card quick-guide-card">
         <div class="card-title">快速指南</div>
-        <el-steps :active="0" direction="vertical">
-          <el-step title="添加设备" description="在设备管理中添加安全设备IP，便于识别日志来源" />
-          <el-step title="配置解析模板" description="在日志解析中创建解析规则，提取日志关键字段" />
-          <el-step title="设置筛选策略" description="配置过滤条件，筛选需要关注的日志" />
-          <el-step title="配置钉钉推送" description="添加钉钉机器人Webhook，创建消息模板和告警策略" />
-          <el-step title="启动服务" description="设置监听端口并启动Syslog服务接收日志" />
-        </el-steps>
+        <div class="guide-grid">
+          <div class="guide-item" @click="navigateTo('/devices')">
+            <div class="guide-step">1</div>
+            <div class="guide-content">
+              <div class="guide-title">添加设备</div>
+              <div class="guide-desc">在设备管理中添加安全设备IP，便于识别日志来源</div>
+            </div>
+          </div>
+          
+          <div class="guide-item" @click="navigateTo('/log-parser')">
+            <div class="guide-step">2</div>
+            <div class="guide-content">
+              <div class="guide-title">配置解析模板</div>
+              <div class="guide-desc">创建解析规则，提取日志关键字段（支持JSON、正则、分隔符）</div>
+            </div>
+          </div>
+          
+          <div class="guide-item" @click="navigateTo('/filter-policies')">
+            <div class="guide-step">3</div>
+            <div class="guide-content">
+              <div class="guide-title">设置筛选策略</div>
+              <div class="guide-desc">配置过滤条件，筛选需要关注的日志，支持告警去重</div>
+            </div>
+          </div>
+          
+          <div class="guide-item" @click="navigateTo('/robots')">
+            <div class="guide-step">4</div>
+            <div class="guide-content">
+              <div class="guide-title">配置钉钉推送</div>
+              <div class="guide-desc">添加钉钉机器人Webhook，创建消息模板和告警策略</div>
+            </div>
+          </div>
+          
+          <div class="guide-item" @click="navigateTo('/dashboard')">
+            <div class="guide-step">5</div>
+            <div class="guide-content">
+              <div class="guide-title">启动服务</div>
+              <div class="guide-desc">设置监听端口并启动Syslog服务，开始接收日志</div>
+            </div>
+          </div>
+          
+          <div class="guide-item" @click="navigateTo('/test-tools')">
+            <div class="guide-step">6</div>
+            <div class="guide-content">
+              <div class="guide-title">测试验证</div>
+              <div class="guide-desc">使用测试工具发送模拟日志，验证配置是否正确</div>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div class="detail-card">
@@ -203,25 +249,8 @@ function navigateTo(path: string) {
 
 <style lang="scss" scoped>
 .workflow-view {
-  .workflow-header {
-    margin-bottom: 20px;
-    
-    h2 {
-      margin: 0 0 6px 0;
-      color: var(--text-primary);
-      font-size: 20px;
-      font-weight: 600;
-    }
-    
-    p {
-      margin: 0;
-      color: var(--text-secondary);
-      font-size: 14px;
-    }
-  }
-  
   .workflow-diagram {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     
     .flow-container {
       background: var(--bg-card);
@@ -229,22 +258,23 @@ function navigateTo(path: string) {
       border: 1px solid var(--border-color);
       padding: 24px;
       
-      .flow-main {
+      .flow-row {
         display: flex;
-        align-items: flex-start;
-        justify-content: center;
+        align-items: center;
+        justify-content: space-between;
         gap: 0;
-        margin-bottom: 24px;
+        margin-bottom: 16px;
         
         .flow-node {
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 16px 20px;
+          padding: 16px 12px;
           cursor: pointer;
           transition: all 0.3s;
           border-radius: 12px;
-          min-width: 100px;
+          flex: 1;
+          max-width: 180px;
           
           &:hover {
             background: var(--bg-hover);
@@ -255,8 +285,8 @@ function navigateTo(path: string) {
           }
           
           .node-icon {
-            width: 60px;
-            height: 60px;
+            width: 56px;
+            height: 56px;
             border-radius: 14px;
             display: flex;
             align-items: center;
@@ -277,6 +307,7 @@ function navigateTo(path: string) {
             margin-top: 4px;
             font-size: 12px;
             color: var(--text-secondary);
+            text-align: center;
           }
           
           &.syslog .node-icon {
@@ -318,13 +349,36 @@ function navigateTo(path: string) {
         .flow-arrow {
           display: flex;
           align-items: center;
-          padding: 0 8px;
-          margin-top: 30px;
+          justify-content: center;
           color: var(--text-muted);
+          padding: 0 4px;
+          flex-shrink: 0;
+        }
+      }
+      
+      .flow-connectors {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 12px;
+        
+        .connector-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          flex: 1;
+          max-width: 180px;
           
-          .arrow-line {
-            width: 20px;
-            height: 2px;
+          .connector-line {
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--border-color), transparent);
+          }
+          
+          .connector-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
             background: var(--border-color);
           }
         }
@@ -332,49 +386,35 @@ function navigateTo(path: string) {
       
       .flow-details {
         display: flex;
-        justify-content: center;
-        gap: 0;
-        padding-top: 8px;
+        justify-content: space-between;
+        gap: 8px;
         
-        .detail-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          min-width: 136px;
-          padding: 0 20px;
+        .detail-card {
+          flex: 1;
+          max-width: 180px;
+          padding: 12px;
+          background: var(--bg-secondary);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: all 0.2s;
+          text-align: center;
           
-          .detail-line {
-            width: 2px;
-            height: 16px;
-            background: linear-gradient(to bottom, var(--border-color), transparent);
+          &:hover {
+            background: var(--bg-hover);
+            transform: translateY(-2px);
           }
           
-          .detail-card {
-            padding: 10px 14px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            max-width: 130px;
-            
-            &:hover {
-              background: var(--bg-hover);
-              transform: translateY(-2px);
-            }
-            
-            .detail-title {
-              font-size: 12px;
-              font-weight: 600;
-              color: var(--text-primary);
-              margin-bottom: 4px;
-            }
-            
-            .detail-desc {
-              font-size: 11px;
-              color: var(--text-secondary);
-              line-height: 1.4;
-            }
+          .detail-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+          }
+          
+          .detail-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
           }
         }
       }
@@ -385,6 +425,7 @@ function navigateTo(path: string) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+    margin-bottom: 16px;
     
     .detail-card {
       background: var(--bg-card);
@@ -392,6 +433,7 @@ function navigateTo(path: string) {
       border: 1px solid var(--border-color);
       padding: 20px;
       overflow: hidden;
+      min-height: 360px;
       
       .card-title {
         font-size: 15px;
@@ -404,24 +446,57 @@ function navigateTo(path: string) {
     }
     
     .quick-guide-card {
-      max-height: 500px;
-      overflow-y: auto;
+      .guide-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
       
-      :deep(.el-steps) {
-        .el-step__title {
+      .guide-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        background: var(--bg-secondary);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+        
+        &:hover {
+          background: var(--bg-hover);
+          transform: translateY(-2px);
+        }
+        
+        .guide-step {
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          background: #ffffff;
+          color: #1d1d1f;
+          border: 1.5px solid #1d1d1f;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           font-size: 14px;
-          line-height: 1.4;
+          font-weight: 600;
+          flex-shrink: 0;
         }
         
-        .el-step__description {
-          font-size: 12px;
-          line-height: 1.5;
-          padding-right: 10px;
-          word-break: break-all;
-        }
-        
-        .el-step__main {
-          padding-right: 0;
+        .guide-content {
+          flex: 1;
+          min-width: 0;
+          
+          .guide-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+          }
+          
+          .guide-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+          }
         }
       }
     }
@@ -463,34 +538,37 @@ function navigateTo(path: string) {
 
 @media (max-width: 1200px) {
   .workflow-view {
-    .workflow-stats {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    
     .workflow-details {
       grid-template-columns: 1fr;
     }
     
     .workflow-diagram .flow-container {
-      .flow-main {
+      .flow-row {
         flex-wrap: wrap;
         gap: 10px;
         
-        .flow-arrow {
-          display: none;
+        .flow-node {
+          min-width: calc(50% - 5px);
+          max-width: none;
         }
+      }
+      
+      .flow-connectors {
+        display: none;
       }
       
       .flow-details {
         flex-wrap: wrap;
-        gap: 10px;
         
-        .detail-item {
-          .detail-line {
-            display: none;
-          }
+        .detail-card {
+          min-width: calc(50% - 5px);
+          max-width: none;
         }
       }
+    }
+    
+    .quick-guide-card .guide-grid {
+      grid-template-columns: 1fr;
     }
   }
 }

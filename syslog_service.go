@@ -556,7 +556,7 @@ func regexpMatch(pattern, str string) (bool, error) {
 
 func (s *SyslogService) sendAlertWithPolicy(log *SyslogLog, device *Device, filterPolicy *FilterPolicy, parsedData map[string]interface{}) {
 	stdlog.Printf("[DEBUG] sendAlertWithPolicy called - LogID: %d, FilterPolicyID: %d, FilterPolicyName: %s", log.ID, filterPolicy.ID, filterPolicy.Name)
-	
+
 	rules := GetAlertRulesByFilterPolicyID(filterPolicy.ID)
 	stdlog.Printf("[DEBUG] Found %d alert rules for filter policy %d", len(rules), filterPolicy.ID)
 
@@ -566,9 +566,9 @@ func (s *SyslogService) sendAlertWithPolicy(log *SyslogLog, device *Device, filt
 			stdlog.Printf("[DEBUG] Robot not found for rule %d: %v", rule.ID, err)
 			continue
 		}
-		
+
 		stdlog.Printf("[DEBUG] Processing robot: %s (ID: %d, Platform: %s)", robot.Name, robot.ID, robot.Platform)
-		
+
 		if !robot.IsActive || !rule.IsActive {
 			stdlog.Printf("[DEBUG] Robot %s or rule is not active, skipping", robot.Name)
 			continue
@@ -587,19 +587,30 @@ func (s *SyslogService) sendAlertWithPolicy(log *SyslogLog, device *Device, filt
 
 		var message string
 		var outputTemplate *OutputTemplate
-		
+
+		stdlog.Printf("[DEBUG] rule.OutputTemplateID: %d", rule.OutputTemplateID)
 		if rule.OutputTemplateID > 0 {
 			outputTemplate, _ = GetOutputTemplateByID(rule.OutputTemplateID)
+			if outputTemplate != nil {
+				stdlog.Printf("[DEBUG] Got outputTemplate by ID: name=%s, platform=%s, fields=%s", outputTemplate.Name, outputTemplate.Platform, outputTemplate.Fields)
+			} else {
+				stdlog.Printf("[DEBUG] outputTemplate not found for ID: %d", rule.OutputTemplateID)
+			}
 		}
-		
-		if outputTemplate == nil || outputTemplate.Platform != platform {
+
+		if outputTemplate == nil || (outputTemplate.Platform != platform && platform != "syslog") {
 			outputTemplate, _ = GetOutputTemplateByPlatform(platform)
+			if outputTemplate != nil {
+				stdlog.Printf("[DEBUG] Got outputTemplate by platform: name=%s, platform=%s, fields=%s", outputTemplate.Name, outputTemplate.Platform, outputTemplate.Fields)
+			} else {
+				stdlog.Printf("[DEBUG] No outputTemplate found for platform: %s", platform)
+			}
 		}
-		
-		if outputTemplate != nil {
+
+		if outputTemplate != nil && platform != "syslog" {
 			message = s.renderOutputTemplate(outputTemplate, parsedData, device, log)
 			stdlog.Printf("[DEBUG] Using template %s (platform: %s) for robot %s", outputTemplate.Name, outputTemplate.Platform, robot.Name)
-		} else {
+		} else if platform != "syslog" {
 			message = s.defaultAlertMessage(log, device)
 			stdlog.Printf("[DEBUG] No template found for platform %s, using default", platform)
 		}
@@ -622,7 +633,65 @@ func (s *SyslogService) sendAlertWithPolicy(log *SyslogLog, device *Device, filt
 			if outputFormat == "" {
 				outputFormat = robot.SyslogFormat
 			}
-			sendErr = SendSyslogForward(robot.SyslogHost, robot.SyslogPort, robot.SyslogProtocol, outputFormat, message, parsedData, log)
+
+			var selectedFields []string
+			stdlog.Printf("[DEBUG] outputTemplate: %+v", outputTemplate)
+			if outputTemplate != nil && outputTemplate.Fields != "" {
+				stdlog.Printf("[DEBUG] outputTemplate.Fields: %s", outputTemplate.Fields)
+				if err := json.Unmarshal([]byte(outputTemplate.Fields), &selectedFields); err != nil {
+					stdlog.Printf("[DEBUG] Failed to parse template fields: %v", err)
+				} else {
+					stdlog.Printf("[DEBUG] selectedFields: %v", selectedFields)
+				}
+			} else {
+				stdlog.Printf("[DEBUG] No outputTemplate or Fields is empty")
+			}
+
+			var fieldMapping string
+			var fieldNameMapping map[string]string
+			var valueTransform string
+			if filterPolicy.ParseTemplateID > 0 {
+				template, err := GetParseTemplateByID(filterPolicy.ParseTemplateID)
+				if err == nil && template != nil {
+					valueTransform = template.ValueTransform
+					if template.ParseType == "smart_delimiter" {
+						if template.SubTemplates != "" {
+							var config struct {
+								SubTemplates map[string]SubTemplateConfig `json:"subTemplates"`
+							}
+							if err := json.Unmarshal([]byte(template.SubTemplates), &config); err == nil {
+								if alertType, ok := parsedData["alertType"].(string); ok {
+									if subTemplate, ok := config.SubTemplates[alertType]; ok {
+										fieldNameMapping = make(map[string]string)
+										if subTemplate.AlertNameField >= 0 {
+											fieldNameMapping[fmt.Sprintf("field_%d", subTemplate.AlertNameField)] = "告警名称"
+										}
+										if subTemplate.AttackIPField >= 0 {
+											fieldNameMapping[fmt.Sprintf("field_%d", subTemplate.AttackIPField)] = "攻击IP"
+										}
+										if subTemplate.VictimIPField >= 0 {
+											fieldNameMapping[fmt.Sprintf("field_%d", subTemplate.VictimIPField)] = "受害IP"
+										}
+										if subTemplate.AlertTimeField >= 0 {
+											fieldNameMapping[fmt.Sprintf("field_%d", subTemplate.AlertTimeField)] = "告警时间"
+										}
+										if subTemplate.SeverityField >= 0 {
+											fieldNameMapping[fmt.Sprintf("field_%d", subTemplate.SeverityField)] = "威胁等级"
+										}
+										if subTemplate.AttackResultField >= 0 {
+											fieldNameMapping[fmt.Sprintf("field_%d", subTemplate.AttackResultField)] = "攻击结果"
+										}
+									}
+								}
+							}
+						}
+					} else {
+						fieldMapping = template.FieldMapping
+					}
+				}
+			}
+
+			sendErr = SendSyslogForward(robot.SyslogHost, robot.SyslogPort, robot.SyslogProtocol, outputFormat, message, parsedData, log, fieldMapping, fieldNameMapping, selectedFields, valueTransform)
 		default:
 			sendErr = SendDingTalkMessage(robot.WebhookURL, robot.Secret, message)
 		}
@@ -655,8 +724,8 @@ func (s *SyslogService) sendAlertWithPolicy(log *SyslogLog, device *Device, filt
 			RobotName: robot.Name,
 			Platform:  platform,
 			Status:    record.Status,
-			ErrorMsg: record.ErrorMsg,
-			SentAt:   record.SentAt,
+			ErrorMsg:  record.ErrorMsg,
+			SentAt:    record.SentAt,
 		}
 		s.addTraceAlertRecord(log.ID, alertRecord)
 		if record.Status == "sent" {

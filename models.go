@@ -72,6 +72,8 @@ type FilterPolicy struct {
 	ParseTemplateID uint           `json:"parseTemplateId" gorm:"index"`
 	Conditions      string         `json:"conditions" gorm:"type:text"`                 // JSON格式筛选条件
 	ConditionLogic  string         `json:"conditionLogic" gorm:"size:10;default:'AND'"` // AND/OR
+	Whitelist       string         `json:"whitelist" gorm:"type:text"`                  // JSON格式白名单配置
+	WhitelistField  string         `json:"whitelistField" gorm:"size:50;default:'sip'"` // 白名单匹配字段，默认sip
 	Action          string         `json:"action" gorm:"size:20;default:'keep'"`        // keep/discard
 	Priority        int            `json:"priority" gorm:"default:0"`
 	IsActive        bool           `json:"isActive" gorm:"default:true"`

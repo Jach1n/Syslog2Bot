@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net"
 	"regexp"
 	"strings"
 	"time"
@@ -12,6 +13,12 @@ type FilterCondition struct {
 	Field    string `json:"field"`
 	Operator string `json:"operator"`
 	Value    string `json:"value"`
+}
+
+type WhitelistItem struct {
+	CIDR        string `json:"cidr"`
+	Description string `json:"description"`
+	Enabled     bool   `json:"enabled"`
 }
 
 type FilterEngine struct {
@@ -59,6 +66,18 @@ func (e *FilterEngine) Match(log *SyslogLog) (bool, map[string]interface{}, erro
 		}
 	}
 	
+	// 先检查白名单
+	if e.policy.Whitelist != "" && e.policy.WhitelistField != "" {
+		matched, err := e.matchWhitelist(parsedData)
+		if err != nil {
+			return false, nil, err
+		}
+		// 如果匹配白名单，直接返回false（不推送告警）
+		if matched {
+			return false, parsedData, nil
+		}
+	}
+	
 	if e.policy.Conditions == "" {
 		return true, parsedData, nil
 	}
@@ -71,6 +90,54 @@ func (e *FilterEngine) Match(log *SyslogLog) (bool, map[string]interface{}, erro
 	matched := e.evaluateConditions(conditions, parsedData, e.policy.ConditionLogic)
 	
 	return matched, parsedData, nil
+}
+
+func (e *FilterEngine) matchWhitelist(data map[string]interface{}) (bool, error) {
+	var whitelist []WhitelistItem
+	if err := json.Unmarshal([]byte(e.policy.Whitelist), &whitelist); err != nil {
+		return false, fmt.Errorf("invalid whitelist: %v", err)
+	}
+	
+	// 获取字段值
+	value, exists := data[e.policy.WhitelistField]
+	if !exists {
+		return false, nil
+	}
+	
+	ipStr := fmt.Sprintf("%v", value)
+	
+	for _, item := range whitelist {
+		if !item.Enabled {
+			continue
+		}
+		
+		if e.matchCIDR(ipStr, item.CIDR) {
+			return true, nil
+		}
+	}
+	
+	return false, nil
+}
+
+func (e *FilterEngine) matchCIDR(ipStr, cidr string) bool {
+	// 如果是单个IP
+	if !strings.Contains(cidr, "/") {
+		return ipStr == cidr
+	}
+	
+	// 解析CIDR
+	_, ipNet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return false
+	}
+	
+	// 解析IP
+	ip := net.ParseIP(ipStr)
+	if ip == nil {
+		return false
+	}
+	
+	return ipNet.Contains(ip)
 }
 
 func (e *FilterEngine) evaluateConditions(conditions []FilterCondition, data map[string]interface{}, logic string) bool {

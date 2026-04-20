@@ -92,6 +92,7 @@ const devices = ref<any[]>([])
 const parseTemplates = ref<any[]>([])
 const selectedParseTemplateId = ref<number>(0)
 const availableFields = ref<{source: string, display: string}[]>([])
+const syslogSelectedFields = ref<string[]>([])
 
 const robotDialogVisible = ref(false)
 const robotDialogTitle = ref('添加推送')
@@ -317,6 +318,7 @@ async function handleSubmitRobot() {
             robotId: robotId,
             filterPolicyId: rule.filterPolicyId,
             outputTemplateId: rule.outputTemplateId || 0,
+            outputFormat: rule.outputFormat || 'json',
             isActive: true
           })
         } else {
@@ -324,6 +326,7 @@ async function handleSubmitRobot() {
             robotId: robotId,
             filterPolicyId: rule.filterPolicyId,
             outputTemplateId: rule.outputTemplateId || 0,
+            outputFormat: rule.outputFormat || 'json',
             isActive: true
           })
         }
@@ -450,11 +453,29 @@ async function testRobotRow(row: Robot) {
   }
 }
 
+function toggleSyslogField(fieldName: string) {
+  const index = syslogSelectedFields.value.indexOf(fieldName)
+  if (index > -1) {
+    syslogSelectedFields.value.splice(index, 1)
+  } else {
+    syslogSelectedFields.value.push(fieldName)
+  }
+}
+
+function toggleAllSyslogFields() {
+  if (syslogSelectedFields.value.length === availableFields.value.length) {
+    syslogSelectedFields.value = []
+  } else {
+    syslogSelectedFields.value = availableFields.value.map(f => f.display)
+  }
+}
+
 function handleAddTemplate() {
   templateDialogTitle.value = '添加推送消息模板'
   templateForm.value = { name: '', platform: 'dingtalk', description: '', content: '', fields: '', deviceType: '', isActive: true }
   selectedParseTemplateId.value = 0
   availableFields.value = []
+  syslogSelectedFields.value = []
   templateDialogVisible.value = true
 }
 
@@ -463,6 +484,15 @@ function handleEditTemplate(row: MessageTemplate) {
   templateForm.value = { ...row }
   selectedParseTemplateId.value = 0
   availableFields.value = []
+  if (row.platform === 'syslog' && row.fields) {
+    try {
+      syslogSelectedFields.value = JSON.parse(row.fields)
+    } catch {
+      syslogSelectedFields.value = []
+    }
+  } else {
+    syslogSelectedFields.value = []
+  }
   templateDialogVisible.value = true
 }
 
@@ -482,8 +512,19 @@ async function handleDeleteTemplate(row: MessageTemplate) {
 }
 
 async function handleSubmitTemplate() {
-  if (!templateForm.value.name || !templateForm.value.content) {
-    ElMessage.warning('请填写必填项')
+  if (!templateForm.value.name) {
+    ElMessage.warning('请填写模板名称')
+    return
+  }
+  if (templateForm.value.platform === 'syslog') {
+    if (syslogSelectedFields.value.length === 0) {
+      ElMessage.warning('请选择输出字段')
+      return
+    }
+    templateForm.value.fields = JSON.stringify(syslogSelectedFields.value)
+    templateForm.value.content = 'syslog'
+  } else if (!templateForm.value.content) {
+    ElMessage.warning('请填写模板内容')
     return
   }
   try {
@@ -764,7 +805,7 @@ function insertAllFields() {
             <el-option label="飞书" value="feishu" />
             <el-option label="企业微信" value="wework" />
             <el-option label="邮箱" value="email" />
-          <el-option label="Syslog" value="syslog" />
+            <el-option label="Syslog" value="syslog" />
           </el-select>
         </el-form-item>
         
@@ -865,7 +906,7 @@ function insertAllFields() {
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item v-if="robotForm.platform !== 'syslog'" label="消息模板">
+              <el-form-item label="消息模板">
                 <el-select v-model="rule.outputTemplateId" placeholder="选择消息模板" style="width: 100%">
                   <el-option :value="0" label="默认模板" />
                   <el-option 
@@ -918,9 +959,20 @@ function insertAllFields() {
                   <el-option label="飞书" value="feishu" />
                   <el-option label="企业微信" value="wework" />
                   <el-option label="邮箱" value="email" />
+                  <el-option label="Syslog" value="syslog" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="模板内容" required>
+              <el-form-item v-if="templateForm.platform === 'syslog'" label="说明">
+                <div class="syslog-tip">
+                  <el-icon><InfoFilled /></el-icon>
+                  <span>请在右侧字段选择器中选择要输出的字段，勾选后保存即可</span>
+                </div>
+                <div v-if="syslogSelectedFields.length > 0" class="selected-fields-preview">
+                  <span class="preview-label">已选字段：</span>
+                  <el-tag v-for="f in syslogSelectedFields" :key="f" size="small" style="margin: 2px;">{{ f }}</el-tag>
+                </div>
+              </el-form-item>
+              <el-form-item v-if="templateForm.platform !== 'syslog'" label="模板内容" required>
                 <div class="template-content-tips">
                   <span class="tip-text">使用 <span v-pre>{{字段名}}</span> 插入变量，换行请直接按 Enter 键</span>
                 </div>
@@ -967,17 +1019,34 @@ function insertAllFields() {
               </el-select>
               
               <div v-if="availableFields.length > 0" class="fields-list">
-                <el-button type="primary" size="small" style="width: 100%; margin-bottom: 8px;" @click="insertAllFields">
+                <el-button 
+                  v-if="templateForm.platform !== 'syslog'" 
+                  type="primary" 
+                  size="small" 
+                  style="width: 100%; margin-bottom: 8px;" 
+                  @click="insertAllFields"
+                >
                   <el-icon><DocumentCopy /></el-icon>
                   插入全部字段
+                </el-button>
+                <el-button 
+                  v-else 
+                  type="primary" 
+                  size="small" 
+                  style="width: 100%; margin-bottom: 8px;" 
+                  @click="toggleAllSyslogFields"
+                >
+                  <el-icon><Check /></el-icon>
+                  {{ syslogSelectedFields.length === availableFields.length ? '取消全选' : '全选' }}
                 </el-button>
                 <div class="field-items">
                   <div 
                     v-for="field in availableFields" 
                     :key="field.source"
-                    class="field-item"
-                    @click="insertField(field)"
+                    :class="['field-item', { 'field-selected': templateForm.platform === 'syslog' && syslogSelectedFields.includes(field.display) }]"
+                    @click="templateForm.platform === 'syslog' ? toggleSyslogField(field.display) : insertField(field)"
                   >
+                    <el-icon v-if="templateForm.platform === 'syslog' && syslogSelectedFields.includes(field.display)" class="field-check"><Check /></el-icon>
                     <span class="field-display">{{ field.display }}</span>
                     <span class="field-source">{{ field.source }}</span>
                   </div>
@@ -1220,6 +1289,58 @@ function insertAllFields() {
     padding: 20px 10px;
     color: var(--text-muted);
     font-size: 12px;
+  }
+
+  .syslog-fields-selector {
+    width: 100%;
+    
+    .syslog-fields-checkbox {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      
+      .el-checkbox {
+        margin-right: 0;
+      }
+    }
+    
+    .selected-fields-preview {
+      margin-top: 12px;
+      padding: 8px;
+      background: var(--bg-hover);
+      border-radius: 6px;
+      
+      .preview-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .syslog-tip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-hover);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+
+  .field-selected {
+    background: var(--accent-color) !important;
+    color: white !important;
+    
+    .field-source {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+  }
+
+  .field-check {
+    margin-right: 4px;
   }
 
   .template-content-tips {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Upload, Download } from '@element-plus/icons-vue'
 import { 
@@ -15,31 +15,23 @@ import {
   ImportFilterPolicies,
   SaveExportedFile
 } from '../../wailsjs/go/main/App'
+import { main } from '../../wailsjs/go/models'
 import { WebAPI } from '../api/web'
 
 const isWeb = typeof window !== 'undefined' && !(window as any).go
 
-interface FilterPolicy {
-  id?: number
-  name: string
-  description: string
-  deviceId: number
-  deviceGroupId: number
-  parseTemplateId: number
-  conditions: string
-  conditionLogic: string
-  action: string
-  priority: number
-  isActive: boolean
-  dedupEnabled: boolean
-  dedupWindow: number
-  dropUnmatched: boolean
-}
+type FilterPolicy = main.FilterPolicy
 
 interface FilterCondition {
   field: string
   operator: string
   value: string
+}
+
+interface WhitelistItem {
+  cidr: string
+  description: string
+  enabled: boolean
 }
 
 const loading = ref(false)
@@ -54,7 +46,7 @@ const selectedPolicies = ref<FilterPolicy[]>([])
 const importDialogVisible = ref(false)
 const importJsonContent = ref('')
 
-const formData = ref<FilterPolicy>({
+const formData = ref<FilterPolicy>(main.FilterPolicy.createFrom({
   name: '',
   description: '',
   deviceId: 0,
@@ -62,19 +54,28 @@ const formData = ref<FilterPolicy>({
   parseTemplateId: 0,
   conditions: '',
   conditionLogic: 'AND',
+  whitelist: '',
+  whitelistField: 'sip',
   action: 'keep',
   priority: 0,
   isActive: true,
   dedupEnabled: true,
   dedupWindow: 60,
   dropUnmatched: false
-})
+}))
 
 const conditions = ref<FilterCondition[]>([])
 const newCondition = ref<FilterCondition>({
   field: '',
   operator: 'equals',
   value: ''
+})
+
+const whitelist = ref<WhitelistItem[]>([])
+const newWhitelistItem = ref<WhitelistItem>({
+  cidr: '',
+  description: '',
+  enabled: true
 })
 
 interface FieldMappingDoc {
@@ -236,7 +237,7 @@ async function loadFieldMappingDocs() {
 function handleAdd() {
   dialogTitle.value = '添加筛选策略'
   const maxPriority = policies.value.length > 0 ? Math.max(...policies.value.map(p => p.priority)) : 0
-  formData.value = {
+  formData.value = main.FilterPolicy.createFrom({
     name: '',
     description: '',
     deviceId: 0,
@@ -244,14 +245,17 @@ function handleAdd() {
     parseTemplateId: 0,
     conditions: '',
     conditionLogic: 'AND',
+    whitelist: '',
+    whitelistField: 'sip',
     action: 'keep',
     priority: maxPriority + 1,
     isActive: true,
     dedupEnabled: true,
     dedupWindow: 60,
     dropUnmatched: false
-  }
+  })
   conditions.value = []
+  whitelist.value = []
   dialogVisible.value = true
 }
 
@@ -305,7 +309,7 @@ async function handleExport() {
 
 function handleEdit(row: FilterPolicy) {
   dialogTitle.value = '编辑筛选策略'
-  formData.value = { ...row }
+  formData.value = main.FilterPolicy.createFrom(row)
   if (row.conditions) {
     try {
       conditions.value = JSON.parse(row.conditions)
@@ -315,6 +319,17 @@ function handleEdit(row: FilterPolicy) {
   } else {
     conditions.value = []
   }
+  
+  if (row.whitelist) {
+    try {
+      whitelist.value = JSON.parse(row.whitelist)
+    } catch {
+      whitelist.value = []
+    }
+  } else {
+    whitelist.value = []
+  }
+  
   dialogVisible.value = true
 }
 
@@ -346,6 +361,27 @@ function removeCondition(index: number) {
   conditions.value.splice(index, 1)
 }
 
+function addWhitelistItem() {
+  if (!newWhitelistItem.value.cidr) {
+    ElMessage.warning('请输入IP或CIDR')
+    return
+  }
+  
+  // 简单验证CIDR格式
+  const cidrPattern = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/
+  if (!cidrPattern.test(newWhitelistItem.value.cidr)) {
+    ElMessage.warning('CIDR格式不正确，请输入如 192.168.1.1 或 192.168.1.0/24')
+    return
+  }
+  
+  whitelist.value.push({ ...newWhitelistItem.value })
+  newWhitelistItem.value = { cidr: '', description: '', enabled: true }
+}
+
+function removeWhitelistItem(index: number) {
+  whitelist.value.splice(index, 1)
+}
+
 async function handleSubmit() {
   if (!formData.value.name) {
     ElMessage.warning('请填写策略名称')
@@ -353,6 +389,7 @@ async function handleSubmit() {
   }
   
   formData.value.conditions = JSON.stringify(conditions.value)
+  formData.value.whitelist = JSON.stringify(whitelist.value)
   
   try {
     if (formData.value.id) {
@@ -480,6 +517,12 @@ function getActionText(action: string): string {
         
         <el-form-item label="筛选条件">
           <div class="conditions-editor">
+            <div v-if="!formData.parseTemplateId" class="condition-tip">
+              <el-alert type="info" :closable="false" show-icon>
+                <template #title>请先选择解析模板</template>
+              </el-alert>
+            </div>
+            
             <div class="condition-input">
               <el-select 
                 v-model="newCondition.field" 
@@ -505,7 +548,6 @@ function getActionText(action: string): string {
                 style="width: 200px" 
               />
               <el-button type="primary" @click="addCondition">添加</el-button>
-              <span v-if="!formData.parseTemplateId" style="color: #999; margin-left: 10px; font-size: 12px;">请先选择解析模板</span>
             </div>
             
             <div v-if="conditions.length > 0" class="conditions-list">
@@ -515,21 +557,88 @@ function getActionText(action: string): string {
                   <el-radio-button value="OR">满足任一</el-radio-button>
                 </el-radio-group>
               </div>
-              <div v-for="(cond, idx) in conditions" :key="idx" class="condition-item">
-                <span class="cond-field">{{ cond.field }}</span>
-                <span class="cond-op">{{ operators.find(o => o.value === cond.operator)?.label }}</span>
-                <span class="cond-value">{{ cond.value || '-' }}</span>
-                <el-button type="danger" link size="small" @click="removeCondition(idx)">删除</el-button>
-              </div>
+              <el-table :data="conditions" style="width: 100%" size="small">
+                <el-table-column label="字段" min-width="120">
+                  <template #default="{ row }">
+                    <el-tag type="primary" size="small">{{ row.field }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作符" width="100" align="center">
+                  <template #default="{ row }">
+                    <span class="cond-op">{{ operators.find(o => o.value === row.operator)?.label }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="值" min-width="180">
+                  <template #default="{ row }">
+                    <span class="cond-value">{{ row.value || '-' }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="70" align="center">
+                  <template #default="{ $index }">
+                    <el-button type="danger" link size="small" @click="removeCondition($index)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+        </el-form-item>
+        
+        <el-form-item label="白名单配置">
+          <div class="whitelist-editor">
+            <div class="whitelist-header">
+              <el-select v-model="formData.whitelistField" style="width: 200px" placeholder="选择匹配字段">
+                <el-option 
+                  v-for="f in availableFields" 
+                  :key="f.value" 
+                  :label="f.label" 
+                  :value="f.value" 
+                />
+              </el-select>
+              <span class="whitelist-tip">匹配白名单的日志将不会推送告警</span>
             </div>
             
-            <div class="condition-tips">
-              <p><strong>操作符说明：</strong></p>
-              <ul>
-                <li><strong>包含于</strong>：字段值在指定的多个值中，多个值用逗号分隔。例如：威胁等级 包含于 "高危,危急"</li>
-                <li><strong>不包含于</strong>：字段值不在指定的多个值中</li>
-                <li><strong>正则匹配</strong>：使用正则表达式匹配</li>
-              </ul>
+            <div class="whitelist-input">
+              <el-input 
+                v-model="newWhitelistItem.cidr" 
+                placeholder="IP/网段，如 192.168.1.0/24，多个用逗号分隔" 
+                style="width: 280px" 
+              />
+              <el-input 
+                v-model="newWhitelistItem.description" 
+                placeholder="描述（可选）" 
+                style="width: 160px" 
+              />
+              <el-switch v-model="newWhitelistItem.enabled" />
+              <el-button type="primary" size="small" @click="addWhitelistItem">添加</el-button>
+            </div>
+            
+            <div v-if="whitelist.length > 0" class="whitelist-list">
+              <el-table :data="whitelist" style="width: 100%" size="small">
+                <el-table-column prop="cidr" label="IP/CIDR" min-width="180">
+                  <template #default="{ row }">
+                    <span class="whitelist-cidr">{{ row.cidr }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="description" label="描述" min-width="140">
+                  <template #default="{ row }">
+                    <span class="whitelist-desc">{{ row.description || '-' }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="状态" width="80" align="center">
+                  <template #default="{ row }">
+                    <el-switch v-model="row.enabled" size="small" />
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="70" align="center">
+                  <template #default="{ $index }">
+                    <el-button type="danger" link size="small" @click="removeWhitelistItem($index)">删除</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+            
+            <div v-else class="whitelist-empty">
+              <el-text type="info">暂无白名单配置</el-text>
             </div>
           </div>
         </el-form-item>
@@ -634,6 +743,10 @@ function getActionText(action: string): string {
   }
   
   .conditions-editor {
+    .condition-tip {
+      margin-bottom: 12px;
+    }
+    
     .condition-input {
       display: flex;
       gap: 10px;
@@ -649,31 +762,14 @@ function getActionText(action: string): string {
         margin-bottom: 10px;
       }
       
-      .condition-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 12px;
-        background: var(--bg-card);
-        border-radius: 6px;
-        margin-bottom: 8px;
-        
-        .cond-field {
-          color: var(--accent-color);
-          font-weight: 500;
-        }
-        
-        .cond-op {
-          color: var(--text-secondary);
-          font-size: 13px;
-        }
-        
-        .cond-value {
-          color: var(--text-primary);
-          font-family: monospace;
-          flex: 1;
-          word-break: break-all;
-        }
+      .cond-op {
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
+      
+      .cond-value {
+        color: var(--text-primary);
+        font-family: monospace;
       }
     }
   }
@@ -713,6 +809,51 @@ function getActionText(action: string): string {
     .dedup-unit {
       color: var(--text-secondary);
       font-size: 13px;
+    }
+  }
+  
+  .whitelist-editor {
+    .whitelist-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      
+      .whitelist-tip {
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
+    }
+    
+    .whitelist-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    
+    .whitelist-list {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 8px;
+      
+      .whitelist-cidr {
+        color: var(--accent-color);
+        font-weight: 500;
+        font-family: monospace;
+      }
+      
+      .whitelist-desc {
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
+    }
+    
+    .whitelist-empty {
+      padding: 12px;
+      text-align: center;
+      background: var(--bg-secondary);
+      border-radius: 8px;
     }
   }
   

@@ -464,10 +464,9 @@ async function runParseTest(preserveMappings: boolean = false) {
         const existingSources = new Set(fieldMappings.value.map(m => m.sourceField))
         for (const field of result.fields) {
           if (!existingSources.has(field)) {
-            const displayName = fieldMappingCache.value[field] || field
             fieldMappings.value.push({
               sourceField: field,
-              displayName: displayName
+              displayName: field
             })
           }
         }
